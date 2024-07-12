@@ -83,6 +83,8 @@
     "task:accounts": "hardhat task:accounts"
   },
   "dependencies": {
+    "@ethersproject/hash": "^5.7.0",
+    "@ethersproject/web": "^5.7.1",
     "@openzeppelin/contracts": "^4.9.2"
   },
   "resolutions": {
