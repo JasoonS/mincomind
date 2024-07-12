@@ -2,124 +2,74 @@
 
 pragma solidity ^0.8.20;
 
+import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
 
-import "fhevm/lib/TFHE.sol";
+contract MincoMind is EIP712WithModifier {
+    constructor() EIP712WithModifier("Authorization token", "1") {}
 
-contract EncryptedERC20 is EIP712WithModifier {
-    euint32 private totalSupply;
-    string public constant name = "Confidential USD";
-    string public constant symbol = "CUSD";
-    uint8 public constant decimals = 18;
-
-    // used for output authorization
-    bytes32 private DOMAIN_SEPARATOR;
-
-    // A mapping from address to an encrypted balance.
-    mapping(address => euint32) internal balances;
-
-    // A mapping of the form mapping(owner => mapping(spender => allowance)).
-    mapping(address => mapping(address => euint32)) internal allowances;
-
-    // The owner of the contract.
-    address public contractOwner;
-
-    constructor() EIP712WithModifier("Authorization token", "1") {
-        contractOwner = msg.sender;
+    struct Game {
+        euint8[4] secret;
+        uint8[4][8] guesses;
+        uint8 numGuesses;
+        bool isComplete;
+        uint32 timeStarted;
     }
 
-    // Sets the balance of the owner to the given encrypted balance.
-    function mint(bytes calldata encryptedAmount) public onlyContractOwner {
-        euint32 amount = TFHE.asEuint32(encryptedAmount);
-        balances[contractOwner] = balances[contractOwner] + amount;
-        totalSupply = totalSupply + amount;
+    struct Clue {
+        uint8 bulls;
+        uint8 cows;
     }
 
-    // Transfers an encrypted amount from the message sender address to the `to` address.
-    function transfer(address to, bytes calldata encryptedAmount) public {
-        transfer(to, TFHE.asEuint32(encryptedAmount));
-    }
+    mapping(address => mapping(uint32 => Game)) games;
+    mapping(address => uint32) latestGames;
 
-    // Transfers an amount from the message sender address to the `to` address.
-    function transfer(address to, euint32 amount) public {
-        _transfer(msg.sender, to, amount);
-    }
-
-    function getTotalSupply(
-        bytes32 publicKey,
-        bytes calldata signature
-    ) public view onlySignedPublicKey(publicKey, signature) returns (bytes memory) {
-        return TFHE.reencrypt(totalSupply, publicKey, 0);
-    }
-
-    // Returns the balance of the caller encrypted under the provided public key.
-    function balanceOf(
-        bytes32 publicKey,
-        bytes calldata signature
-    ) public view onlySignedPublicKey(publicKey, signature) returns (bytes memory) {
-        return TFHE.reencrypt(balances[msg.sender], publicKey, 0);
-    }
-
-    // Sets the `encryptedAmount` as the allowance of `spender` over the caller's tokens.
-    function approve(address spender, bytes calldata encryptedAmount) public {
-        address owner = msg.sender;
-        _approve(owner, spender, TFHE.asEuint32(encryptedAmount));
-    }
-
-    // Returns the remaining number of tokens that `spender` is allowed to spend
-    // on behalf of the caller. The returned ciphertext is under the caller public FHE key.
-    function allowance(
-        address spender,
-        bytes32 publicKey,
-        bytes calldata signature
-    ) public view onlySignedPublicKey(publicKey, signature) returns (bytes memory) {
-        address owner = msg.sender;
-
-        return TFHE.reencrypt(_allowance(owner, spender), publicKey);
-    }
-
-    // Transfers `encryptedAmount` tokens using the caller's allowance.
-    function transferFrom(address from, address to, bytes calldata encryptedAmount) public {
-        transferFrom(from, to, TFHE.asEuint32(encryptedAmount));
-    }
-
-    // Transfers `amount` tokens using the caller's allowance.
-    function transferFrom(address from, address to, euint32 amount) public {
-        address spender = msg.sender;
-        _updateAllowance(from, spender, amount);
-        _transfer(from, to, amount);
-    }
-
-    function _approve(address owner, address spender, euint32 amount) internal {
-        allowances[owner][spender] = amount;
-    }
-
-    function _allowance(address owner, address spender) internal view returns (euint32) {
-        if (TFHE.isInitialized(allowances[owner][spender])) {
-            return allowances[owner][spender];
-        } else {
-            return TFHE.asEuint32(0);
+    function generateSecret() private view returns (euint8[4] memory) {
+        euint8[4] memory secret;
+        for (uint i = 0; i < secret.length; i++) {
+            secret[i] = TFHE.randEuint8();
         }
+
+        return secret;
     }
 
-    function _updateAllowance(address owner, address spender, euint32 amount) internal {
-        euint32 currentAllowance = _allowance(owner, spender);
-        TFHE.optReq(TFHE.le(amount, currentAllowance));
-        _approve(owner, spender, TFHE.sub(currentAllowance, amount));
+    function newGame() public {
+        uint32 latestGame = ++latestGames[msg.sender];
+        uint8[4][8] memory guesses;
+        games[msg.sender][latestGame] = Game({
+            secret: generateSecret(),
+            guesses: guesses,
+            numGuesses: 0,
+            isComplete: false,
+            timeStarted: uint32(block.timestamp)
+        });
     }
 
-    // Transfers an encrypted amount.
-    function _transfer(address from, address to, euint32 amount) internal {
-        // Make sure the sender has enough tokens.
-        TFHE.optReq(TFHE.le(amount, balances[from]));
+    function addGuess(uint8[4] memory guess) public returns (bool) {
+        Game storage game = games[msg.sender][latestGames[msg.sender]];
+        require(game.numGuesses < 8, "Too many guesses");
+        require(!game.isComplete, "Game is already complete");
 
-        // Add to the balance of `to` and subract from the balance of `from`.
-        balances[to] = balances[to] + amount;
-        balances[from] = balances[from] - amount;
-    }
+        Clue memory clue;
 
-    modifier onlyContractOwner() {
-        require(msg.sender == contractOwner);
-        _;
+// euint8[4]
+//         euint8 bulls;
+//         euint8 cows;
+//         for (uint i = 0; i < game.secret.length; i++) {
+//             euint8 numBulls = TFHE.add(
+//                 bulls,
+//                 TFHE.cmux(TFHE.eq(game.secret[i], TFHE.asEuint8(guess[i])), TFHE.asEuint8(1), TFHE.asEuint8(0))
+//             );
+// TFHE.ne(numBulls,)
+//
+//             bulls += numBulls;
+//
+//isBull = secret slot = currentSlot
+//isCow = if !isBull {
+//iterate through array and look for first match
+}
+
+
+        }
     }
 }
