@@ -1,0 +1,5 @@
+type Spin {
+  id: ID!
+  number: Int!
+  blockNumber: BigInt!
+}

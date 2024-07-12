@@ -1,0 +1,1 @@
+# Mincomind envio indexer

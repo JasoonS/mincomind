@@ -1,0 +1,15 @@
+name: Mincomind
+description: Mincomind indexer
+contracts:
+  - name: Random
+    handler: ./src/EventHandlers.ts
+    events:
+      - event: RandomNumber(uint16 number)
+networks:
+  - id: 17077 # Inco
+    start_block: 0
+    rpc_config:
+      url: https://testnet.inco.org/
+    contracts:
+      - name: Random
+        address: 0x4782Ed86C4A799BDC6120885f2ACAbCE47B908A8
