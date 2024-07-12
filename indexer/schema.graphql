@@ -1,5 +1,12 @@
-type Spin {
+type Players {
   id: ID!
-  number: Int!
-  blockNumber: BigInt!
+  points: BigInt!
+  numberOfGames: Int!
+  active: Boolean! # false if the player withdraw their portion of the pot
+}
+
+type Tournament {
+  id: ID! # singleton - Mincomind
+  pot: BigInt!
+  players: Players!
 }

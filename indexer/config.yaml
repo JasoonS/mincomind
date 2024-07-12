@@ -1,15 +1,22 @@
 name: Mincomind
 description: Mincomind indexer
 contracts:
-  - name: Random
+  - name: Game
     handler: ./src/EventHandlers.ts
     events:
-      - event: RandomNumber(uint16 number)
+      - event: GameStarted(address player)
+      - event: GameOutcome(address player, uint32 points)
+  - name: Pot
+    handler: ./src/EventHandlers.ts
+    events:
+      - event: FundsWithdrawn(address player, uint32 amount)
 networks:
   - id: 17077 # Inco
-    start_block: 0
+    start_block: 2449015 # todo: update to when contracts are deployed
     rpc_config:
       url: https://testnet.inco.org/
     contracts:
-      - name: Random
-        address: 0x4782Ed86C4A799BDC6120885f2ACAbCE47B908A8
+      - name: Game
+        address: # todo: update to when contracts are deployed
+      - name: Pot
+        address: # todo: update to when contracts are deployed
