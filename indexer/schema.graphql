@@ -6,7 +6,7 @@ type Players {
 }
 
 type Tournament {
-  id: ID! # singleton - Mincomind
+  id: ID! # singleton - mincomind
   pot: BigInt!
-  players: Players!
+  players: [Players!]!
 }
