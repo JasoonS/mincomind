@@ -42,10 +42,17 @@ contract Mincomind is Reencrypt {
 
     uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
 
-    event NewGame(address indexed player, uint32 gameId);
-    event GuessAdded(address indexed player, uint32 gameId, uint8 numGuesses, uint8[4] guess);
-    event GameOutcome(address indexed player, uint32 gameId, uint8 points);
-    event FundsWithdrawn(address player, uint256 amount);
+    event NewGame(address indexed player, uint32 indexed gameId);
+    event GuessAdded(
+        address indexed player,
+        uint32 indexed gameId,
+        uint8 indexed numGuesses,
+        uint8[4] guess,
+        uint8 bulls,
+        uint8 cows
+    );
+    event GameOutcome(address indexed player, uint32 indexed gameId, uint8 points);
+    event FundsWithdrawn(address indexed player, uint256 amount);
 
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
@@ -64,10 +71,7 @@ contract Mincomind is Reencrypt {
                 "Can't start new game before completing current game"
             );
         }
-        // require(
-        //     games[msg.sender][latestGames[msg.sender]].isComplete,
-        //     "Can't start new game before completing current game"
-        // );
+
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -92,20 +96,26 @@ contract Mincomind is Reencrypt {
     }
 
     function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
-        ebool[4] memory used;
+        ebool[4] memory usedByBulls;
         euint8 bulls;
         for (uint i = 0; i < secret.length; i++) {
             ebool isBull = TFHE.eq(secret[i], TFHE.asEuint8(guess[i]));
             bulls = bulls + TFHE.cmux(isBull, TFHE.asEuint8(1), TFHE.asEuint8(0));
-            used[i] = isBull;
+            usedByBulls[i] = isBull;
         }
 
         euint8 cows;
+        // We need to keep the used array for bulls separate from cows
+        ebool[4] memory used;
+        for (uint i = 0; i < secret.length; i++) {
+            used[i] = usedByBulls[i]; // need to make a copy and no longer mutate usedByBulls
+        }
+
         for (uint i = 0; i < secret.length; i++) {
             ebool isCow = TFHE.asEbool(false);
             for (uint j = 0; j < secret.length; j++) {
                 ebool isCowFromCurrentCheck = TFHE.and(
-                    TFHE.and(TFHE.and(TFHE.not(used[i]), TFHE.not(used[j])), TFHE.not(isCow)),
+                    TFHE.and(TFHE.and(TFHE.not(usedByBulls[i]), TFHE.not(used[j])), TFHE.not(isCow)),
                     TFHE.eq(secret[j], TFHE.asEuint8(guess[i]))
                 );
                 used[j] = TFHE.or(used[j], isCowFromCurrentCheck);
@@ -125,7 +135,12 @@ contract Mincomind is Reencrypt {
         game.numGuesses += 1;
         game.lastGuessTimestamp = uint64(block.timestamp);
 
-        emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess);
+        // NOTE the below line is only used for indexing - the smart contract get the return value to prevent manipulation (and reverting)
+        //      it isn't needed for the game to operate correctly, and uses more gas.
+        //      Before going to 'mainnet' this contract should check and make sure miner manipulation cannot allow miners to exploit this contract.
+        Clue memory guessHint = compareArrays(game.secret, guess);
+
+        emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess, guessHint.bulls, guessHint.cows);
     }
 
     function endGame(address user) public {
@@ -153,7 +168,8 @@ contract Mincomind is Reencrypt {
 
         uint256 pot = address(this).balance - lockedFunds;
 
-        uint256 amount = (((userPoints * 10e18) / totalPoints) * pot) / 10e18;
+        uint256 amount = (pot * userPoints) / totalPoints;
+
 
         // set points to 0 for user
         totalPoints -= userPoints;

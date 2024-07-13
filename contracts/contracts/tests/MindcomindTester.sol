@@ -12,24 +12,30 @@ contract FakeFHE {
     ////////////////////
 
     function compareArraysDebug(uint8[4] memory secret, uint8[4] memory guess) public pure returns (uint8, uint8) {
-        bool[4] memory used;
+        bool[4] memory usedByBulls;
         uint8 bulls;
         for (uint i = 0; i < secret.length; i++) {
             bool isBull = fAKEeq(secret[i], fAKEasEuint8(guess[i]));
             bulls += fAKEcmux(isBull, 1, 0);
-            used[i] = isBull;
+            usedByBulls[i] = isBull;
         }
 
         uint8 cows;
+        // We need to keep the used array for bulls separate from cows
+        bool[4] memory used;
+        for (uint i = 0; i < secret.length; i++) {
+            used[i] = usedByBulls[i]; // need to make a copy and no longer mutate usedByBulls
+        }
+
         for (uint i = 0; i < secret.length; i++) {
             bool isCow = false;
             for (uint j = 0; j < secret.length; j++) {
-                console.log("secret: %s = %s (%s)", i, secret[j], used[i]);
-                console.log("guess: %s = %s (%s)", j, guess[i], used[j]);
+                console.log("guess: %s = %s (%s)", i, guess[i], used[i]);
+                console.log("secret: %s = %s (%s)", j, secret[j], used[j]);
                 console.log("");
 
                 bool isCowFromCurrentCheck = fAKEand(
-                    fAKEand(fAKEnot(used[i]), fAKEnot(used[j])),
+                    fAKEand(fAKEnot(usedByBulls[i]), fAKEnot(used[j])),
                     fAKEnot(isCow) && fAKEeq(secret[j], fAKEasEuint8(guess[i]))
                 );
 
@@ -85,14 +91,6 @@ contract MincomindTester is Mincomind, FakeFHE {
     constructor() Mincomind() {}
 
     function initializeGameWithValues(uint8 first, uint8 second, uint8 third, uint8 fourth) public payable {
-        console.log("Deploy values", msg.value, DEPOSIT_AMOUNT);
-        if (msg.value == 0) {
-            revert("Value cannot be zero");
-        } else if (msg.value < DEPOSIT_AMOUNT) {
-            revert("Deposit too low");
-        } else if (msg.value > DEPOSIT_AMOUNT) {
-            revert("Deposit too high");
-        }
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
 
         euint8[4] memory secret;
@@ -112,7 +110,9 @@ contract MincomindTester is Mincomind, FakeFHE {
             timeStarted: uint32(block.timestamp)
         });
 
-        // lockedFunds += DEPOSIT_AMOUNT;
+        lockedFunds += DEPOSIT_AMOUNT;
+
+        emit NewGame(msg.sender, latestGame);
     }
 
     function checkGuessedResultHacked(

@@ -7,7 +7,7 @@ import { createTransaction } from "../utils";
 import { deployMincomindFixture, deployMincomindFixtureTester, deployFakeFHEFixture } from "./Mincomind.fixture";
 import exp from "constants";
 
-describe("MincomindAlgo", function () {
+describe.only("MincomindAlgo", function () {
   before(async function () {
     this.signers = await getSigners(ethers);
   });
@@ -17,12 +17,147 @@ describe("MincomindAlgo", function () {
   });
 
   // not working with payable value
-  it("Test values are correct", async function () {
-    const input = [1, 2, 3, 4]
-    const check = [1, 3, 5, 3]
+  it("Test values are correct - Case 1", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [1, 3, 5, 3];
     const expected = [1n, 1n];
 
     const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 2", async function () {
+    const check = [4, 3, 2, 1];
+    const input = [1, 2, 3, 4];
+    const expected = [0n, 4n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 3", async function () {
+    const input = [1, 1, 1, 1];
+    const check = [1, 1, 1, 1];
+    const expected = [4n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 4", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [1, 2, 3, 4];
+    const expected = [4n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 5", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [0, 0, 0, 0];
+    const expected = [0n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 6", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [2, 1, 1, 1];
+    const expected = [0n, 2n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 7", async function () {
+    const input = [4, 4, 4, 4];
+    const check = [1, 1, 1, 1];
+    const expected = [0n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 8", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [2, 1, 4, 3];
+    const expected = [0n, 4n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 9", async function () {
+    const input = [1, 2, 2, 2];
+    const check = [2, 4, 3, 3];
+    const expected = [0n, 1n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 10", async function () {
+    const input = [1, 2, 3, 4];
+    const check = [5, 6, 7, 8];
+    const expected = [0n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 11", async function () {
+    const input = [5, 6, 7, 7];
+    const check = [5, 6, 7, 5];
+    const expected = [3n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 12", async function () {
+    const input = [5, 6, 7, 0];
+    const check = [0, 7, 6, 5];
+    const expected = [0n, 4n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 13", async function () {
+    const input = [5, 5, 5, 5];
+    const check = [5, 5, 5, 5];
+    const expected = [4n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 14", async function () {
+    const input = [5, 5, 5, 5];
+    const check = [6, 6, 6, 6];
+    const expected = [0n, 0n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 15", async function () {
+    const input = [1, 1, 2, 2];
+    const check = [2, 2, 1, 1];
+    const expected = [0n, 4n];
+
+    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it("Test values are correct - Case 16", async function () {
+    const secret = [1, 1, 3, 4];
+    const check = [2, 2, 1, 1];
+    const expected = [0n, 2n];
+
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 });

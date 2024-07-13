@@ -26,4 +26,6 @@ type Guess {
   guessPos1: Int!
   guessPos2: Int!
   guessPos3: Int!
+  hintBulls: Int!
+  hintCows: Int!
 }
