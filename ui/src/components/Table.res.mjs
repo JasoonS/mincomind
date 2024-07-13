@@ -10,7 +10,20 @@ function Table$Row(props) {
   return JsxRuntime.jsxs("tr", {
               children: [
                 JsxRuntime.jsx("td", {
-                      children: player.id,
+                      children: JsxRuntime.jsxs("a", {
+                            children: [
+                              JsxRuntime.jsx("span", {
+                                    children: "🔗",
+                                    className: "bg-blue-100 pointer p-1 mx-2 hover:bg-blue-800 rounded"
+                                  }),
+                              "  ",
+                              player.id
+                            ],
+                            className: "pointer hover:opacity-70",
+                            href: "https://explorer.testnet.inco.org/address/" + player.id,
+                            rel: "no-referrer no-openner",
+                            target: "_blank"
+                          }),
                       className: "py-1 px-3 text-left"
                     }),
                 JsxRuntime.jsx("td", {

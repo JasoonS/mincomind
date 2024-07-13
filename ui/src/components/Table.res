@@ -6,7 +6,19 @@ module Row = {
   @react.component
   let make = (~player: player, ~rowStyle: string) => {
     <tr className=rowStyle>
-      <td className="py-1 px-3 text-left"> {player.id->React.string} </td>
+      <td className="py-1 px-3 text-left">
+        <a
+          href={`https://explorer.testnet.inco.org/address/${player.id}`}
+          target="_blank"
+          rel="no-referrer no-openner"
+          className="pointer hover:opacity-70">
+          <span className="bg-blue-100 pointer p-1 mx-2 hover:bg-blue-800 rounded">
+            {"🔗"->React.string}
+          </span>
+          {"  "->React.string}
+          {player.id->React.string}
+        </a>
+      </td>
       <td className="py-1 px-3 text-left"> {player.numberOfGames->Int.toString->React.string} </td>
       <td className="py-1 px-3 text-left"> {player.points->React.string} </td>
       <td className="py-1 px-3 text-left"> {"$"->React.string} </td>
