@@ -16,3 +16,5 @@ task("task:newGame")
 
     console.log("Newgame created");
   });
+
+// npx hardhat task:newGame  --account alice --network inco

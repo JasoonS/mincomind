@@ -6,6 +6,7 @@ import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 
 import "./tasks/accounts";
+import "./tasks/addGuess";
 import "./tasks/deployERC20";
 import "./tasks/getEthereumAddress";
 import "./tasks/mint";
