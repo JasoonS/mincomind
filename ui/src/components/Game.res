@@ -109,9 +109,7 @@ module GuessRow = {
         ->React.array}
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
-        <div className="text-white opacity-40 pr-4">
-          {(9 - attempt)->Int.toString->React.string}
-        </div>
+        <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
         {guess
         ->Guess.toArray
         ->Array.mapWithIndex((c, i) => {
@@ -225,7 +223,7 @@ module ColorSelector = {
 }
 module EmptyRow = {
   @react.component
-  let make = () => {
+  let make = (~index) => {
     <div className="bg-blue-300 flex items-center border w-full">
       <div className="w-14 grid grid-cols-2 gap-1 border p-1">
         {Array.make(~length=4, None)
@@ -238,6 +236,9 @@ module EmptyRow = {
         ->React.array}
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
+        <div className="text-white opacity-40 pr-4">
+          {(8 - index)->Int.toString->React.string}
+        </div>
         {Array.make(~length=4, Red)
         ->Array.mapWithIndex((c, i) => {
           <div
@@ -301,7 +302,7 @@ let make = (~walletClient: Viem.walletClient, ~publicClient) => {
       <SolutionRow />
       {grid
       ->Js.Array2.slice(~start=0, ~end_=8 - guesses->Array.length)
-      ->Array.map(_ => <EmptyRow />)
+      ->Array.mapWithIndex((x, index) => <EmptyRow index />)
       ->React.array}
       {guesses
       ->Array.mapWithIndex((guess, i) => {

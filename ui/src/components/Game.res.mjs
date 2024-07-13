@@ -169,7 +169,7 @@ function Game$GuessRow(props) {
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: (9 - props.attempt | 0).toString(),
+                              children: " ",
                               className: "text-white opacity-40 pr-4"
                             }),
                         toArray(guess.guess).map(function (c, i) {
@@ -350,12 +350,18 @@ function Game$EmptyRow(props) {
                           }),
                       className: "w-14 grid grid-cols-2 gap-1 border p-1"
                     }),
-                JsxRuntime.jsx("div", {
-                      children: Core__Array.make(4, 0).map(function (c, i) {
-                            return JsxRuntime.jsx("div", {
-                                        className: "border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25"
-                                      }, i.toString());
-                          }),
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: (8 - props.index | 0).toString(),
+                              className: "text-white opacity-40 pr-4"
+                            }),
+                        Core__Array.make(4, 0).map(function (c, i) {
+                              return JsxRuntime.jsx("div", {
+                                          className: "border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25"
+                                        }, i.toString());
+                            })
+                      ],
                       className: "flex gap-1 mx-auto items-center p-2"
                     })
               ],
@@ -431,8 +437,10 @@ function Game(props) {
               children: JsxRuntime.jsxs("div", {
                     children: [
                       JsxRuntime.jsx(Game$SolutionRow, {}),
-                      grid.slice(0, 8 - guesses.length | 0).map(function (param) {
-                            return JsxRuntime.jsx(Game$EmptyRow, {});
+                      grid.slice(0, 8 - guesses.length | 0).map(function (x, index) {
+                            return JsxRuntime.jsx(Game$EmptyRow, {
+                                        index: index
+                                      });
                           }),
                       guesses.map(function (guess, i) {
                             return JsxRuntime.jsx(Game$GuessRow, {
