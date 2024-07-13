@@ -56,7 +56,9 @@ contract Mincomind is Reencrypt {
 
     function newGame() public payable{
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
-        require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
+        if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0){
+         require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
+        }
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
