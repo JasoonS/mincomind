@@ -6,7 +6,82 @@ import "../Mincomind.sol";
 
 import "hardhat/console.sol";
 
-contract MincomindTester is Mincomind {
+contract FakeFHE {
+    ////////////////////
+    /// Faked algorithm for debugging
+    ////////////////////
+
+    function compareArraysDebug(uint8[4] memory secret, uint8[4] memory guess) public pure returns (uint8, uint8) {
+        bool[4] memory used;
+        uint8 bulls;
+        for (uint i = 0; i < secret.length; i++) {
+            bool isBull = fAKEeq(secret[i], fAKEasEuint8(guess[i]));
+            bulls += fAKEcmux(isBull, 1, 0);
+            used[i] = isBull;
+        }
+
+        uint8 cows;
+        for (uint i = 0; i < secret.length; i++) {
+            bool isCow = false;
+            for (uint j = 0; j < secret.length; j++) {
+                console.log("secret: %s = %s (%s)", i, secret[j], used[i]);
+                console.log("guess: %s = %s (%s)", j, guess[i], used[j]);
+                console.log("");
+
+                bool isCowFromCurrentCheck = fAKEand(
+                    fAKEand(fAKEnot(used[i]), fAKEnot(used[j])),
+                    fAKEnot(isCow) && fAKEeq(secret[j], fAKEasEuint8(guess[i]))
+                );
+
+                if (isCowFromCurrentCheck) {
+                    console.log("!!!\n!!!\n\nisCowFromCurrentCheck: %s \n\n!!!\n!!!\n", isCowFromCurrentCheck);
+                }
+
+                used[j] = fAKEor(used[j], isCowFromCurrentCheck);
+                isCow = fAKEor(isCow, isCowFromCurrentCheck);
+
+                console.log("updated used[j]: %s", used[j]);
+                console.log("updated isCow: %s", isCow);
+                console.log("\n---------\n");
+            }
+            cows += fAKEcmux(isCow, 1, 0);
+            console.log("cows after iteration %s: %s", i, cows);
+        }
+
+        // return Clue({ bulls: fAKEdecrypt(bulls), cows: fAKEdecrypt(cows) });
+        return (bulls, cows);
+    }
+
+    // Fake versions of the TFHE functions
+    function fAKEcmux(bool condition, uint8 trueVal, uint8 falseVal) private pure returns (uint8) {
+        return condition ? trueVal : falseVal;
+    }
+
+    function fAKEasEuint8(uint8 value) private pure returns (uint8) {
+        return value;
+    }
+
+    function fAKEeq(uint8 a, uint8 b) private pure returns (bool) {
+        return a == b;
+    }
+
+    function fAKEand(bool a, bool b) private pure returns (bool) {
+        return a && b;
+    }
+
+    function fAKEnot(bool a) private pure returns (bool) {
+        return !a;
+    }
+
+    function fAKEor(bool a, bool b) private pure returns (bool) {
+        return a || b;
+    }
+
+    function fAKEdecrypt(uint8 value) public pure returns (uint8) {
+        return value;
+    }
+}
+contract MincomindTester is Mincomind, FakeFHE {
     constructor() Mincomind() {}
 
     function initializeGameWithValues(uint8 first, uint8 second, uint8 third, uint8 fourth) public payable {
@@ -38,6 +113,16 @@ contract MincomindTester is Mincomind {
         });
 
         // lockedFunds += DEPOSIT_AMOUNT;
+    }
+
+    function checkGuessedResultHacked(
+        address player,
+        uint32 gameId,
+        uint8[4] calldata guess
+    ) public view returns (Clue memory) {
+        Game memory game = games[player][gameId];
+
+        return compareArrays(game.secret, guess);
     }
 
     function viewSecret(address player, uint32 gameId) public view returns (uint8[4] memory) {

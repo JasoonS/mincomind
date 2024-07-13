@@ -88,21 +88,25 @@ contract Mincomind is Reencrypt {
         require(game.lastGuessTimestamp < uint64(block.timestamp), "Can't view result in same block as guess");
         require(guessIndex < 8, "index too high");
 
+        return compareArrays(game.secret, guess);
+    }
+
+    function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
         ebool[4] memory used;
         euint8 bulls;
-        for (uint i = 0; i < game.secret.length; i++) {
-            ebool isBull = TFHE.eq(game.secret[i], TFHE.asEuint8(guess[i]));
+        for (uint i = 0; i < secret.length; i++) {
+            ebool isBull = TFHE.eq(secret[i], TFHE.asEuint8(guess[i]));
             bulls = bulls + TFHE.cmux(isBull, TFHE.asEuint8(1), TFHE.asEuint8(0));
             used[i] = isBull;
         }
 
         euint8 cows;
-        for (uint i = 0; i < game.secret.length; i++) {
+        for (uint i = 0; i < secret.length; i++) {
             ebool isCow = TFHE.asEbool(false);
-            for (uint j = 0; j < game.secret.length; j++) {
+            for (uint j = 0; j < secret.length; j++) {
                 ebool isCowFromCurrentCheck = TFHE.and(
                     TFHE.and(TFHE.and(TFHE.not(used[i]), TFHE.not(used[j])), TFHE.not(isCow)),
-                    TFHE.ne(game.secret[j], TFHE.asEuint8(guess[i]))
+                    TFHE.eq(secret[j], TFHE.asEuint8(guess[i]))
                 );
                 used[j] = TFHE.or(used[j], isCowFromCurrentCheck);
                 isCow = TFHE.or(isCow, isCowFromCurrentCheck);
