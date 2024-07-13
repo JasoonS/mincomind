@@ -15,11 +15,10 @@
   "suffix": ".res.mjs",
   "bs-dependencies": [
     "@rescript/core",
-    "@rescript/react"
+    "@rescript/react",
+    "@glennsl/rescript-fetch"
   ],
-  "bsc-flags": [
-    "-open RescriptCore"
-  ],
+  "bsc-flags": ["-open RescriptCore"],
   "jsx": {
     "version": 4
   }

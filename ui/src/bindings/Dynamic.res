@@ -153,9 +153,12 @@ module DynamicWidget = {
 }
 
 module Hooks = {
+  type publicClient
+  type walletClient
   type connector = {
     getPublicClient: unit => promise<Viem.publicClient>,
     getWalletClient: unit => Viem.walletClient,
+
   }
   type primaryWallet = {connector: Js.Nullable.t<connector>}
   type network = {networkChainId?: int, networkName?: string}
