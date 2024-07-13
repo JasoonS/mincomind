@@ -3,7 +3,7 @@
 import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
-var playersQuery = "\nquery MyQuery {\n  Player(where: {active: {_eq: true}}) {\n    id\n    points\n    numberOfGames\n  }\n}\n    ";
+var playersQuery = "\nquery MyQuery {\n  Player(where: {active: {_eq: true}}, order_by: {points: desc}) {\n    id\n    points\n    numberOfGames\n  }\n}\n\n    ";
 
 async function fetchPlayers(indexerEndpoint) {
   try {

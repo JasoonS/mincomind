@@ -4,12 +4,13 @@ type error = {message: string}
 
 let playersQuery = `
 query MyQuery {
-  Player(where: {active: {_eq: true}}) {
+  Player(where: {active: {_eq: true}}, order_by: {points: desc}) {
     id
     points
     numberOfGames
   }
 }
+
     `
 
 type player = {id: string, points: string, numberOfGames: int}
