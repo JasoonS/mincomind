@@ -91,14 +91,6 @@ contract MincomindTester is Mincomind, FakeFHE {
     constructor() Mincomind() {}
 
     function initializeGameWithValues(uint8 first, uint8 second, uint8 third, uint8 fourth) public payable {
-        console.log("Deploy values", msg.value, DEPOSIT_AMOUNT);
-        if (msg.value == 0) {
-            revert("Value cannot be zero");
-        } else if (msg.value < DEPOSIT_AMOUNT) {
-            revert("Deposit too low");
-        } else if (msg.value > DEPOSIT_AMOUNT) {
-            revert("Deposit too high");
-        }
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
 
         euint8[4] memory secret;
@@ -118,7 +110,9 @@ contract MincomindTester is Mincomind, FakeFHE {
             timeStarted: uint32(block.timestamp)
         });
 
-        // lockedFunds += DEPOSIT_AMOUNT;
+        lockedFunds += DEPOSIT_AMOUNT;
+
+        emit NewGame(msg.sender, latestGame);
     }
 
     function checkGuessedResultHacked(
