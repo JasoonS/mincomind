@@ -19,7 +19,7 @@ GameContract.NewGame.handler(async ({ event, context }) => {
     context.Player.set({
       id: event.params.player,
       points: BigInt(0),
-      numberOfGames: 0,
+      numberOfGames: 1,
       active: true,
     });
   }
