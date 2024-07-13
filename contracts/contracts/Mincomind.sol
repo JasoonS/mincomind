@@ -124,8 +124,7 @@ contract Mincomind is Reencrypt {
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
         uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
         points[user] += gamePoints;
-        totalPoints += gamePoints;
-        require(clue.bulls == 4, "Guess is not correct");
+        totalPoints += gamePoints;        
 
         game.isComplete = true;        
 
