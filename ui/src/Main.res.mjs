@@ -4,6 +4,8 @@ import * as App from "./App.res.mjs";
 import * as React from "react";
 import * as Client from "react-dom/client";
 import * as JsxRuntime from "react/jsx-runtime";
+import * as Ethereum from "@dynamic-labs/ethereum";
+import * as SdkReactCore from "@dynamic-labs/sdk-react-core";
 
 import './index.css'
 ;
@@ -12,7 +14,16 @@ var domElement = document.querySelector("#root");
 
 if (!(domElement == null)) {
   Client.createRoot(domElement).render(JsxRuntime.jsx(React.StrictMode, {
-            children: JsxRuntime.jsx(App.make, {})
+            children: JsxRuntime.jsxs(SdkReactCore.DynamicContextProvider, {
+                  children: [
+                    JsxRuntime.jsx(SdkReactCore.DynamicWidget, {}),
+                    JsxRuntime.jsx(App.make, {})
+                  ],
+                  settings: {
+                    environmentId: "cc8f4069-49e6-4958-87c6-c7ee274ddf20",
+                    walletConnectors: [Ethereum.EthereumWalletConnectors]
+                  }
+                })
           }));
 }
 
