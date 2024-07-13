@@ -110,7 +110,7 @@ GameContract.GuessAdded.handler(async ({ event, context }) => {
     guessPos1: Number(event.params.guess[1]),
     guessPos2: Number(event.params.guess[2]),
     guessPos3: Number(event.params.guess[3]),
-    hintBulls: Number(event.params.buls),
+    hintBulls: Number(event.params.bulls),
     hintCows: Number(event.params.cows),
   });
 

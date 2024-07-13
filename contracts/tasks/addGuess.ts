@@ -25,5 +25,3 @@ task("task:addGuess")
   });
 
 // npx hardhat task:addGuess --guess0 1 --guess1 1 --guess2 2 --guess3 3 --account alice --network inco
-
-// 0xD779aF109edeEa4655d4A947BdD279fFEfCb3EA0

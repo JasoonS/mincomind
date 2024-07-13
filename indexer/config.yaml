@@ -6,13 +6,13 @@ contracts:
     events:
       - event: NewGame(address indexed player, uint32 indexed gameId)
       - event: GameOutcome(address indexed player, uint32 indexed gameId, uint8 points)
-      - event: GuessAdded(address indexed player, uint32 indexed gameId, uint8 indexed numGuesses, uint8[4] guess, uint8 buls, uint8 cows)
+      - event: GuessAdded(address indexed player, uint32 indexed gameId, uint8 indexed numGuesses, uint8[4] guess, uint8 bulls, uint8 cows)
       - event: FundsWithdrawn(address indexed player, uint256 amount)
 networks:
   - id: 9090 # Inco
-    start_block: 2460116
+    start_block: 2462556
     rpc_config:
       url: https://testnet.inco.org/
     contracts:
       - name: Game
-        address: 0x4e099588EA51F450c9807Ba5E6295B8e71cf4610
+        address: 0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5
