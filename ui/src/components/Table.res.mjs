@@ -149,7 +149,7 @@ function useFetchPlayers(indexerEndpoint) {
 }
 
 function Table(props) {
-  var playersReq = useFetchPlayers("https://indexer.staging.bigdevenergy.link/b13f675/v1/graphql");
+  var playersReq = useFetchPlayers("https://indexer.staging.bigdevenergy.link/7f6ebc9/v1/graphql");
   var tmp;
   tmp = typeof playersReq !== "object" ? JsxRuntime.jsx("div", {
           children: "loading..."
