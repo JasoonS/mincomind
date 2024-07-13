@@ -28,6 +28,9 @@ contract Mincomind is Reencrypt {
     // user => latestGameId
     mapping(address => uint32) latestGames;
 
+    // user => points
+    mapping(address => uint32) public points;
+
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
     uint16 constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
 
@@ -109,6 +112,7 @@ contract Mincomind is Reencrypt {
         // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
         uint8 memory points = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        points[user] += points;
         require(clue.bulls == 4, "Guess is not correct");
 
         game.isComplete = true;
