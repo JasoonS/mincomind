@@ -1,12 +1,29 @@
-type Players {
+type Tournament {
+  id: ID! # singleton - mincomind
+  pot: BigInt!
+}
+
+type Player {
   id: ID!
   points: BigInt!
   numberOfGames: Int!
   active: Boolean! # false if the player withdraw their portion of the pot
 }
 
-type Tournament {
-  id: ID! # singleton - mincomind
-  pot: BigInt!
-  players: [Players!]!
+type Game {
+  id: ID! # player-gameid
+  player: String!
+  gameId: String!
+}
+
+type Guess {
+  id: ID! # player-gameid-attempt
+  gameIdLink: String! # player-gameid
+  player: String!
+  gameId: String!
+  attempt: Int!
+  guessPos0: Int!
+  guessPos1: Int!
+  guessPos2: Int!
+  guessPos3: Int!
 }

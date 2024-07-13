@@ -6,9 +6,13 @@ import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 
 import "./tasks/accounts";
+import "./tasks/addGuess";
 import "./tasks/deployERC20";
+import "./tasks/endGame";
 import "./tasks/getEthereumAddress";
 import "./tasks/mint";
+import "./tasks/newGame";
+import "./tasks/withdrawFunds";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });

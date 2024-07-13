@@ -111,7 +111,7 @@ npx hardhat deploy --network inco
 Run the `mint` task on the Inco Gentry Testnet Network:
 
 ```sh
-npx hardhat task:mint --mint [AMOUNT] --account [alice|bob|carol|dave] --network inco
+npx hardhat task:newGame  --account alice --network inco
 ```
 
 (For more control over the deployment process, you can rewrite the deployment script (deploy.ts) and use the command

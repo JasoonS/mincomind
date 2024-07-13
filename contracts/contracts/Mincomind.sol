@@ -41,7 +41,7 @@ contract Mincomind is Reencrypt {
      uint256 public constant DEPOSIT_AMOUNT = 0.001 ether; // 1_000_000_000_000_000 wei
 
     event NewGame(address indexed player, uint32 gameId);
-    event GuessAdded(address indexed player, uint32 gameId, uint8[4] guess);
+    event GuessAdded(address indexed player, uint32 gameId, uint8 numGuesses, uint8[4] guess);
     event GameOutcome(address indexed player, uint32 gameId, uint8 points);
     event FundsWithdrawn(address player, uint256 amount);
 
@@ -56,7 +56,9 @@ contract Mincomind is Reencrypt {
 
     function newGame() public payable{
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
-        require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
+        if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0){
+         require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
+        }
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -110,7 +112,7 @@ contract Mincomind is Reencrypt {
         game.numGuesses += 1;
         game.lastGuessTimestamp = uint64(block.timestamp);
 
-        emit GuessAdded(msg.sender, latestGames[msg.sender], guess);
+        emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess);
     }
 
     function endGame(address user) public {        
@@ -122,8 +124,7 @@ contract Mincomind is Reencrypt {
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
         uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
         points[user] += gamePoints;
-        totalPoints += gamePoints;
-        require(clue.bulls == 4, "Guess is not correct");
+        totalPoints += gamePoints;        
 
         game.isComplete = true;        
 
@@ -137,10 +138,9 @@ contract Mincomind is Reencrypt {
      function withdrawFunds() public {
         uint32 userPoints = points[msg.sender];
         
-        uint256 pot = address(this).balance - lockedFunds; 
-        uint32  precision = 100;
+        uint256 pot = address(this).balance - lockedFunds;         
         
-        uint256 amount = (userPoints * precision / totalPoints * pot) / precision * 10e18; // todo: double check calcs
+        uint256 amount = ((userPoints * 10e18 / totalPoints) * pot) / 10e18;
 
         // set points to 0 for user
         totalPoints -= userPoints;
