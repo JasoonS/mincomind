@@ -39,6 +39,7 @@ contract Mincomind is Reencrypt {
 
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
     uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
+
     uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
 
     event NewGame(address indexed player, uint32 indexed gameId);
@@ -63,7 +64,6 @@ contract Mincomind is Reencrypt {
     }
 
     function newGame() public payable {
-        // console.log("Deploy values", msg.value, DEPOSIT_AMOUNT);
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
         if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0) {
             require(
@@ -170,6 +170,7 @@ contract Mincomind is Reencrypt {
 
         uint256 amount = (pot * userPoints) / totalPoints;
 
+
         // set points to 0 for user
         totalPoints -= userPoints;
         points[msg.sender] = 0;
@@ -178,5 +179,13 @@ contract Mincomind is Reencrypt {
         payable(msg.sender).transfer(amount);
 
         emit FundsWithdrawn(msg.sender, amount);
+    }
+
+    function getLatestGameId(address user) public view returns (uint32) {
+        return latestGames[user];
+    }
+
+    function getGame(address user, uint32 gameId) public view returns (Game memory) {
+        return games[user][gameId];
     }
 }

@@ -10,9 +10,9 @@ contracts:
       - event: FundsWithdrawn(address indexed player, uint256 amount)
 networks:
   - id: 9090 # Inco
-    start_block: 2449015 # todo: update to when contracts are deployed
+    start_block: 2460116
     rpc_config:
       url: https://testnet.inco.org/
     contracts:
       - name: Game
-        address: # todo: update to when contracts are deployed
+        address: 0x4e099588EA51F450c9807Ba5E6295B8e71cf4610
