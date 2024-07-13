@@ -95,8 +95,10 @@ let useFetchPlayers = (~indexerEndpoint) => {
 
 @react.component
 let make = () => {
-  // https://indexer.staging.bigdevenergy.link/b13f675/v1/graphql
-  let playersReq = useFetchPlayers(~indexerEndpoint="http://localhost:8080/v1/graphql")
+  let playersReq = useFetchPlayers(
+    ~indexerEndpoint="https://indexer.staging.bigdevenergy.link/b13f675/v1/graphql",
+  )
+  // let playersReq = useFetchPlayers(~indexerEndpoint="http://localhost:8080/v1/graphql")
 
   <div>
     <div
