@@ -24,6 +24,7 @@ export const createTransaction = async <A extends [...{ [I in keyof A]-?: A[I] |
   value: string | number | bigint,
   ...params: A
 ) => {
+  console.log("value", value);
   const gasLimit = await method.estimateGas(...params);
   const updatedParams: ContractMethodArgs<A> = [
     ...params,

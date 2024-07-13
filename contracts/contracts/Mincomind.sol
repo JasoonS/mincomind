@@ -4,6 +4,7 @@ pragma solidity 0.8.22;
 
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/Reencrypt.sol";
+import "hardhat/console.sol";
 
 contract Mincomind is Reencrypt {
     constructor() Reencrypt() {}
@@ -38,7 +39,8 @@ contract Mincomind is Reencrypt {
 
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
     uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
-    uint256 public constant DEPOSIT_AMOUNT = 0.001 ether; // 1_000_000_000_000_000 wei
+
+    uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
 
     event NewGame(address indexed player, uint32 gameId);
     event GuessAdded(address indexed player, uint32 gameId, uint8 numGuesses, uint8[4] guess);
@@ -48,8 +50,8 @@ contract Mincomind is Reencrypt {
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
         for (uint i = 0; i < secret.length; i++) {
-            // We bit shift it 5 places to make sure we only have 8 possible values.
-            secret[i] = TFHE.shr(TFHE.randEuint8(), TFHE.asEuint8(5));
+            // We take modulo 6 to make sure we only have 6 possible values.
+            secret[i] = TFHE.rem(TFHE.randEuint8(), 6);
         }
         return secret;
     }
@@ -62,6 +64,10 @@ contract Mincomind is Reencrypt {
                 "Can't start new game before completing current game"
             );
         }
+        // require(
+        //     games[msg.sender][latestGames[msg.sender]].isComplete,
+        //     "Can't start new game before completing current game"
+        // );
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -82,21 +88,25 @@ contract Mincomind is Reencrypt {
         require(game.lastGuessTimestamp < uint64(block.timestamp), "Can't view result in same block as guess");
         require(guessIndex < 8, "index too high");
 
+        return compareArrays(game.secret, guess);
+    }
+
+    function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
         ebool[4] memory used;
         euint8 bulls;
-        for (uint i = 0; i < game.secret.length; i++) {
-            ebool isBull = TFHE.eq(game.secret[i], TFHE.asEuint8(guess[i]));
+        for (uint i = 0; i < secret.length; i++) {
+            ebool isBull = TFHE.eq(secret[i], TFHE.asEuint8(guess[i]));
             bulls = bulls + TFHE.cmux(isBull, TFHE.asEuint8(1), TFHE.asEuint8(0));
             used[i] = isBull;
         }
 
         euint8 cows;
-        for (uint i = 0; i < game.secret.length; i++) {
+        for (uint i = 0; i < secret.length; i++) {
             ebool isCow = TFHE.asEbool(false);
-            for (uint j = 0; j < game.secret.length; j++) {
+            for (uint j = 0; j < secret.length; j++) {
                 ebool isCowFromCurrentCheck = TFHE.and(
                     TFHE.and(TFHE.and(TFHE.not(used[i]), TFHE.not(used[j])), TFHE.not(isCow)),
-                    TFHE.ne(game.secret[j], TFHE.asEuint8(guess[i]))
+                    TFHE.eq(secret[j], TFHE.asEuint8(guess[i]))
                 );
                 used[j] = TFHE.or(used[j], isCowFromCurrentCheck);
                 isCow = TFHE.or(isCow, isCowFromCurrentCheck);
