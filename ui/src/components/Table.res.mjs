@@ -35,6 +35,8 @@ var Row = {
 };
 
 function Table$TableInner(props) {
+  var players = props.players;
+  console.log("players", players);
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("table", {
                     children: [
@@ -62,7 +64,7 @@ function Table$TableInner(props) {
                             className: "m-10 text-xs bg-black"
                           }),
                       JsxRuntime.jsx("tbody", {
-                            children: props.players.map(function (player, index) {
+                            children: players.map(function (player, index) {
                                   return JsxRuntime.jsx(Table$Row, {
                                               player: player,
                                               rowStyle: index % 2 === 0 ? "bg-white bg-opacity-10" : ""
@@ -114,7 +116,7 @@ var TableOuter = {
 function formatFetch(playersResponse) {
   var data = playersResponse.data;
   if (data !== undefined) {
-    return data;
+    return data.Player;
   } else {
     return [];
   }
@@ -142,7 +144,7 @@ function useFetchPlayers(indexerEndpoint) {
                       });
           };
           fetchPlayers(indexerEndpoint);
-        }), [indexerEndpoint]);
+        }), []);
   return match[0];
 }
 

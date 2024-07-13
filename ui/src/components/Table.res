@@ -17,6 +17,7 @@ module Row = {
 module TableInner = {
   @react.component
   let make = (~players, ~page, ~pageSize) => {
+    Console.log2("players", players)
     <div>
       <table
         className="text-white border rounded border-2 border-primary p-2 m-2 bg-black bg-opacity-30">
@@ -65,14 +66,14 @@ module TableOuter = {
 
 let formatFetch = (~playersResponse: Queries.playerReqResponse) => {
   switch playersResponse.data {
-  | Some(data) => data
+  | Some(data) => data.inner
   | None => []
   }
 }
 
 let useFetchPlayers = (~indexerEndpoint) => {
   let (players: playerReq, setPlayers) = React.useState(_ => Loading)
-  React.useEffect(() => {
+  React.useEffect0(() => {
     let fetchPlayers = async indexerEndpoint => {
       let playersResponseOpt: option<Queries.playerReqResponse> = await Queries.fetchPlayers(
         ~indexerEndpoint,
@@ -88,7 +89,7 @@ let useFetchPlayers = (~indexerEndpoint) => {
     }
     let _ = fetchPlayers(indexerEndpoint)
     None
-  }, [indexerEndpoint])
+  })
   players
 }
 

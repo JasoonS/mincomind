@@ -13,7 +13,8 @@ query MyQuery {
     `
 
 type player = {id: string, points: string, numberOfGames: int}
-type playerReqResponse = {data?: array<player>, errors?: array<error>}
+type playerInner = {@as("Player") inner: array<player>}
+type playerReqResponse = {data?: playerInner, errors?: array<error>}
 
 let fetchPlayers = async (~indexerEndpoint): option<playerReqResponse> => {
   try {
