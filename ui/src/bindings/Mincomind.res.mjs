@@ -3,7 +3,6 @@
 import * as Viem from "viem";
 import * as AbiMjs from "./abi.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-import * as TestclientMjs from "./testclient.mjs";
 
 var address = Viem.getAddress("0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5");
 
@@ -39,24 +38,11 @@ function getContract(walletClient, publicClient) {
               address: address,
               abi: abi,
               client: {
-                public: Caml_option.some(publicClient)
+                public: Caml_option.some(publicClient),
+                wallet: Caml_option.some(walletClient)
               }
             });
 }
-
-var testclient = TestclientMjs.testclient;
-
-var contract = Viem.getContract({
-      address: address,
-      abi: abi,
-      client: {
-        public: Caml_option.some(testclient)
-      }
-    });
-
-contract.read.getLatestGameId([Viem.getAddress("0x7660788b35e06A4D6BF4985729ED1721dE351e7b")]).then(function (res) {
-      console.log("latest", res);
-    });
 
 export {
   address ,
@@ -64,7 +50,5 @@ export {
   Guess ,
   Clue ,
   getContract ,
-  testclient ,
-  contract ,
 }
 /* address Not a pure module */
