@@ -1,0 +1,10 @@
+body {
+  background-image: url("pixel-bg.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Optional: to keep the background fixed during scrolling */
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
