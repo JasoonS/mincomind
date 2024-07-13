@@ -33,12 +33,17 @@ contract Mincomind is Reencrypt {
 
     uint32 public totalPoints = 0;
 
+    // amount of funds in contract still locked in an active game
+    uint256 public lockedFunds = 0;
+
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
      uint16 public constant MAX_SECONDS_PER_GAME  = 600; // 10 minutes
+     uint256 public constant DEPOSIT_AMOUNT = 0.001 ether; // 1_000_000_000_000_000 wei
 
     event NewGame(address indexed player, uint32 gameId);
     event GuessAdded(address indexed player, uint32 gameId, uint8[4] guess);
     event GameOutcome(address indexed player, uint32 gameId, uint8 points);
+    event FundsWithdrawn(address player, uint256 amount);
 
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
@@ -49,12 +54,8 @@ contract Mincomind is Reencrypt {
         return secret;
     }
 
-    function zeroPoints () external {        
-        totalPoints -= points[tx.origin];
-        points[tx.origin] = 0;
-    }
-
-    function newGame() public {
+    function newGame() public payable{
+        require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
         require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
@@ -66,6 +67,7 @@ contract Mincomind is Reencrypt {
             isComplete: false,
             timeStarted: uint32(block.timestamp)
         });
+        lockedFunds += DEPOSIT_AMOUNT;
         emit NewGame(msg.sender, latestGame);
     }
 
@@ -123,12 +125,30 @@ contract Mincomind is Reencrypt {
         totalPoints += gamePoints;
         require(clue.bulls == 4, "Guess is not correct");
 
-        game.isComplete = true;
+        game.isComplete = true;        
 
-        // todo: transfer user deposit to pot
+        lockedFunds -= DEPOSIT_AMOUNT;
 
         // todo: add secret reveal
 
         emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
+    }
+
+     function withdrawFunds() public {
+        uint32 userPoints = points[msg.sender];
+        
+        uint256 pot = address(this).balance - lockedFunds; 
+        uint32  precision = 100;
+        
+        uint256 amount = (userPoints * precision / totalPoints * pot) / precision * 10e18; // todo: double check calcs
+
+        // set points to 0 for user
+        totalPoints -= userPoints;
+        points[msg.sender] = 0;
+
+        // transfer funds to user
+        payable(msg.sender).transfer(amount);
+
+        emit FundsWithdrawn(msg.sender, amount);
     }
 }
