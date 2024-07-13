@@ -63,21 +63,26 @@ module Guess = {
 
 module GuessRow = {
   @react.component
-  let make = (~guess: Guess.guess) => {
+  let make = (~guess: Guess.guess, ~attempt: int) => {
     let {guess, cowsAndBulls} = guess
-    <div className="bg-amber-700 flex items-center border w-full">
-      <div className="w-20 grid grid-cols-2 gap-1 border p-1">
+    <div className="bg-blue-300 flex items-center border w-full">
+      <div className="w-14 grid grid-cols-2 gap-1 border p-1">
         {cowsAndBulls
         ->CowsAndBulls.toPegOptions
         ->Array.mapWithIndex((optCowOrBull, i) => {
           <div
             key={i->Int.toString}
-            className={`border h-8 rounded-full ${CowsAndBulls.getBgColor(optCowOrBull)}`}
+            className={`border border-blue-500 h-5 rounded-full ${CowsAndBulls.getBgColor(
+                optCowOrBull,
+              )}`}
           />
         })
         ->React.array}
       </div>
-      <div className="flex gap-1 justify-between p-4">
+      <div className="flex gap-1 mx-auto items-center p-2">
+        <div className="text-white opacity-40 pr-4">
+          {(9 - attempt)->Int.toString->React.string}
+        </div>
         {guess
         ->Guess.toArray
         ->Array.mapWithIndex((c, i) => {
@@ -107,9 +112,26 @@ module GuessCreator = {
     let set1 = _ => setCurrentGuess(prev => {...prev, _1: Some(selectedColor)})
     let set2 = _ => setCurrentGuess(prev => {...prev, _2: Some(selectedColor)})
     let set3 = _ => setCurrentGuess(prev => {...prev, _3: Some(selectedColor)})
-    <div className="bg-amber-700 flex items-center border w-full">
-      <div className="w-20 grid grid-cols-2 gap-1 border p-1"> {"Submit"->React.string} </div>
-      <div className="flex gap-1 justify-between p-4">
+
+    let allSelected =
+      currentGuess._0 != None &&
+      currentGuess._1 != None &&
+      currentGuess._2 != None &&
+      currentGuess._3 != None
+
+    <div className="bg-blue-400 flex items-center border w-full">
+      <div className="w-16 grid  text-center">
+        {allSelected
+          ? <button
+              disabled={!allSelected}
+              className="text-center text-white text-lg mx-auto border py-0 px-2">
+              {` OK `->React.string}
+            </button>
+          : <p className="text-white text-center text-xxs leading-tight">
+              {`Select colors`->React.string}
+            </p>}
+      </div>
+      <div className="flex gap-1 justify-between p-1 mx-auto">
         <div
           onClick=set0
           className={`border h-10 w-10 drop-shadow-md rounded-full ${getOptBgColor(
@@ -146,22 +168,51 @@ module ColorSelector = {
     let getBgColor = c => {
       let bgColor = getBgColor(c)
       if c == selectedColor {
-        bgColor ++ " brightness-75"
+        bgColor ++ " brightness-75 border border-2 border-white"
       } else {
         bgColor
       }
     }
 
-    <div className="flex gap-1 justify-between p-4">
+    <div className="flex gap-1 justify-between p-2">
       {colors
       ->Array.mapWithIndex((c, i) => {
         <div
           key={i->Int.toString}
           onClick={_ => setSelectedColor(_ => c)}
-          className={`border h-10 w-10 drop-shadow-md rounded-full ${getBgColor(c)}`}
+          className={` h-10 w-10 drop-shadow-md rounded-full ${getBgColor(
+              c,
+            )} pointer hover:brightness-20 `}
         />
       })
       ->React.array}
+    </div>
+  }
+}
+module EmptyRow = {
+  @react.component
+  let make = () => {
+    <div className="bg-blue-300 flex items-center border w-full">
+      <div className="w-14 grid grid-cols-2 gap-1 border p-1">
+        {Array.make(~length=4, None)
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={i->Int.toString}
+            className={`border h-5 rounded-full ${CowsAndBulls.getBgColor(None)}`}
+          />
+        })
+        ->React.array}
+      </div>
+      <div className="flex gap-1 mx-auto items-center p-2">
+        {Array.make(~length=4, Red)
+        ->Array.mapWithIndex((c, i) => {
+          <div
+            key={i->Int.toString}
+            className={`border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25`}
+          />
+        })
+        ->React.array}
+      </div>
     </div>
   }
 }
@@ -187,15 +238,28 @@ let mockGuesses: array<Guess.guess> =
     makeGuess(~guess=Guess.make(Yellow, Yellow, Orange, Orange), ~cows=2, ~bulls=2),
   ]->Array.filterMap(resultToOption)
 
+// let emptyBoard: array<Guess.guessInput> =
+//   [
+//     makeGuess(~guess=Guess.make(Blue, Red, Orange, Yellow), ~cows=1, ~bulls=1),
+//     makeGuess(~guess=Guess.make(Purple, Red, Yellow, Green), ~cows=2, ~bulls=0),
+//     makeGuess(~guess=Guess.make(Blue, Blue, Orange, Orange), ~cows=0, ~bulls=3),
+//     makeGuess(~guess=Guess.make(Yellow, Yellow, Orange, Orange), ~cows=2, ~bulls=2),
+//   ]->Array.filterMap(resultToOption)
+
 @react.component
 let make = () => {
   let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
   let (selectedColor, setSelectedColor) = React.useState(_ => Red)
-  <div className="flex flex-col items-center max-w-md">
+  <div className="flex flex-col items-center max-w-md mx-auto rounded px-8">
     <div>
+      // todo
+      <EmptyRow />
+      <EmptyRow />
+      <EmptyRow />
+      <EmptyRow />
       {guesses
       ->Array.mapWithIndex((guess, i) => {
-        <GuessRow key={i->Int.toString} guess />
+        <GuessRow key={i->Int.toString} guess attempt={i} />
       })
       ->React.array}
       <GuessCreator selectedColor />

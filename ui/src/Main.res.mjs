@@ -10,6 +10,36 @@ import * as SdkReactCore from "@dynamic-labs/sdk-react-core";
 import './index.css'
 ;
 
+var incoNetwork_chainName = "Inco testnet";
+
+var incoNetwork_iconUrls = ["data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTAgOS42QzAgNC4yOTgwNyA0LjI5ODA3IDAgOS42IDBINTAuNEM1NS43MDE5IDAgNjAgNC4yOTgwNyA2MCA5LjZWNTAuNEM2MCA1NS43MDE5IDU1LjcwMTkgNjAgNTAuNCA2MEg5LjZDNC4yOTgwNyA2MCAwIDU1LjcwMTkgMCA1MC40VjkuNloiIGZpbGw9IiMzNjczRjUiLz4KPHBhdGggZD0iTTExLjQwMjMgNDEuNEwxNy40NTAzIDE4LjZIMjQuMDAyM0wxNy45NTQzIDQxLjRIMTEuNDAyM1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yNC4wMDIzIDQxLjRMMzAuMDUwMyAxOC42SDM2LjYwMjNMMzAuNTU0MyA0MS40SDI0LjAwMjNaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzYuNjAyMyA0MS40TDQyLjY1MDMgMTguNkg0OS4yMDIzTDQzLjE1NDMgNDEuNEgzNi42MDIzWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg=="];
+
+var incoNetwork_nativeCurrency = {
+  name: "INCO",
+  symbol: "INC",
+  decimals: 18
+};
+
+var incoNetwork_rpcUrls = ["https://testnet.inco.org/"];
+
+var incoNetwork_blockExplorerUrls = ["https://explorer.testnet.inco.org/"];
+
+var incoNetwork_vanityName = "Inco testnet";
+
+var incoNetwork = {
+  chainName: incoNetwork_chainName,
+  name: "Inco testnet",
+  shortName: "inco",
+  chain: "inco",
+  chainId: 9090,
+  networkId: 9090,
+  iconUrls: incoNetwork_iconUrls,
+  nativeCurrency: incoNetwork_nativeCurrency,
+  rpcUrls: incoNetwork_rpcUrls,
+  blockExplorerUrls: incoNetwork_blockExplorerUrls,
+  vanityName: incoNetwork_vanityName
+};
+
 var domElement = document.querySelector("#root");
 
 if (!(domElement == null)) {
@@ -21,13 +51,18 @@ if (!(domElement == null)) {
                   ],
                   settings: {
                     environmentId: "cc8f4069-49e6-4958-87c6-c7ee274ddf20",
-                    walletConnectors: [Ethereum.EthereumWalletConnectors]
+                    walletConnectors: [Ethereum.EthereumWalletConnectors],
+                    overrides: {
+                      evmNetworks: (function (param) {
+                          return [incoNetwork];
+                        })
+                    }
                   }
                 })
           }));
 }
 
 export {
-  
+  incoNetwork ,
 }
 /*  Not a pure module */

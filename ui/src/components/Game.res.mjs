@@ -106,21 +106,27 @@ function Game$GuessRow(props) {
                 JsxRuntime.jsx("div", {
                       children: toPegOptions(guess.cowsAndBulls).map(function (optCowOrBull, i) {
                             return JsxRuntime.jsx("div", {
-                                        className: "border h-8 rounded-full " + getBgColor$1(optCowOrBull)
+                                        className: "border border-blue-500 h-5 rounded-full " + getBgColor$1(optCowOrBull)
                                       }, i.toString());
                           }),
-                      className: "w-20 grid grid-cols-2 gap-1 border p-1"
+                      className: "w-14 grid grid-cols-2 gap-1 border p-1"
                     }),
-                JsxRuntime.jsx("div", {
-                      children: toArray(guess.guess).map(function (c, i) {
-                            return JsxRuntime.jsx("div", {
-                                        className: "border h-10 w-10 drop-shadow-md rounded-full " + getBgColor(c)
-                                      }, i.toString());
-                          }),
-                      className: "flex gap-1 justify-between p-4"
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: (9 - props.attempt | 0).toString(),
+                              className: "text-white opacity-40 pr-4"
+                            }),
+                        toArray(guess.guess).map(function (c, i) {
+                              return JsxRuntime.jsx("div", {
+                                          className: "border h-10 w-10 drop-shadow-md rounded-full " + getBgColor(c)
+                                        }, i.toString());
+                            })
+                      ],
+                      className: "flex gap-1 mx-auto items-center p-2"
                     })
               ],
-              className: "bg-amber-700 flex items-center border w-full"
+              className: "bg-blue-300 flex items-center border w-full"
             });
 }
 
@@ -187,11 +193,19 @@ function Game$GuessCreator(props) {
                 };
         });
   };
+  var allSelected = currentGuess._0 !== undefined && currentGuess._1 !== undefined && currentGuess._2 !== undefined && currentGuess._3 !== undefined;
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
-                      children: "Submit",
-                      className: "w-20 grid grid-cols-2 gap-1 border p-1"
+                      children: allSelected ? JsxRuntime.jsx("button", {
+                              children: " OK ",
+                              className: "text-center text-white text-lg mx-auto border py-0 px-2",
+                              disabled: !allSelected
+                            }) : JsxRuntime.jsx("p", {
+                              children: "Select colors",
+                              className: "text-white text-center text-xxs leading-tight"
+                            }),
+                      className: "w-16 grid  text-center"
                     }),
                 JsxRuntime.jsxs("div", {
                       children: [
@@ -212,10 +226,10 @@ function Game$GuessCreator(props) {
                               onClick: set3
                             })
                       ],
-                      className: "flex gap-1 justify-between p-4"
+                      className: "flex gap-1 justify-between p-1 mx-auto"
                     })
               ],
-              className: "bg-amber-700 flex items-center border w-full"
+              className: "bg-blue-400 flex items-center border w-full"
             });
 }
 
@@ -237,7 +251,7 @@ function Game$ColorSelector(props) {
   var getBgColor$2 = function (c) {
     var bgColor = getBgColor(c);
     if (c === selectedColor) {
-      return bgColor + " brightness-75";
+      return bgColor + " brightness-75 border border-2 border-white";
     } else {
       return bgColor;
     }
@@ -245,7 +259,7 @@ function Game$ColorSelector(props) {
   return JsxRuntime.jsx("div", {
               children: colors.map(function (c, i) {
                     return JsxRuntime.jsx("div", {
-                                className: "border h-10 w-10 drop-shadow-md rounded-full " + getBgColor$2(c),
+                                className: " h-10 w-10 drop-shadow-md rounded-full " + getBgColor$2(c) + " pointer hover:brightness-20 ",
                                 onClick: (function (param) {
                                     setSelectedColor(function (param) {
                                           return c;
@@ -253,12 +267,40 @@ function Game$ColorSelector(props) {
                                   })
                               }, i.toString());
                   }),
-              className: "flex gap-1 justify-between p-4"
+              className: "flex gap-1 justify-between p-2"
             });
 }
 
 var ColorSelector = {
   make: Game$ColorSelector
+};
+
+function Game$EmptyRow(props) {
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(4, undefined).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        className: "border h-5 rounded-full " + getBgColor$1(undefined)
+                                      }, i.toString());
+                          }),
+                      className: "w-14 grid grid-cols-2 gap-1 border p-1"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(4, 0).map(function (c, i) {
+                            return JsxRuntime.jsx("div", {
+                                        className: "border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25"
+                                      }, i.toString());
+                          }),
+                      className: "flex gap-1 mx-auto items-center p-2"
+                    })
+              ],
+              className: "bg-blue-300 flex items-center border w-full"
+            });
+}
+
+var EmptyRow = {
+  make: Game$EmptyRow
 };
 
 function makeGuess(guess, cows, bulls) {
@@ -315,9 +357,14 @@ function Game(props) {
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("div", {
                     children: [
+                      JsxRuntime.jsx(Game$EmptyRow, {}),
+                      JsxRuntime.jsx(Game$EmptyRow, {}),
+                      JsxRuntime.jsx(Game$EmptyRow, {}),
+                      JsxRuntime.jsx(Game$EmptyRow, {}),
                       match[0].map(function (guess, i) {
                             return JsxRuntime.jsx(Game$GuessRow, {
-                                        guess: guess
+                                        guess: guess,
+                                        attempt: i
                                       }, i.toString());
                           }),
                       JsxRuntime.jsx(Game$GuessCreator, {
@@ -329,7 +376,7 @@ function Game(props) {
                           })
                     ]
                   }),
-              className: "flex flex-col items-center max-w-md"
+              className: "flex flex-col items-center max-w-md mx-auto rounded px-8"
             });
 }
 
@@ -342,6 +389,7 @@ export {
   GuessRow ,
   GuessCreator ,
   ColorSelector ,
+  EmptyRow ,
   makeGuess ,
   resultToOption ,
   mockGuesses ,
