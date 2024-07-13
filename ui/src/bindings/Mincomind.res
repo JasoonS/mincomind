@@ -1,6 +1,11 @@
-@module
-external abi: Viem.abi = "../../../contracts/artifacts/contracts/Mincomind.sol/Mincomind.json"
-let address = "0xTODO"->Viem.getAddressUnsafe
+// type hardhatAbi = {abi: Viem.abi}
+// @module
+// external hardhatAbi: hardhatAbi =
+//   "../../../contracts/artifacts/contracts/Mincomind.sol/Mincomind.json"
+let address = "0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5"->Viem.getAddressUnsafe
+@module("./abi.mjs") external abi: Viem.abi = "abi"
+// let abi =
+//   ["function getLatestGameId(address user) public view returns (uint32)"]->Viem.parseAbiUnsafe
 
 type gameId = int
 type secret
@@ -46,8 +51,8 @@ module Clue = {
 }
 
 type viewFns = {
-  getLatestGameId: (~user: Viem.address) => promise<gameId>,
-  getGame: (~user: Viem.address, ~gameId: gameId) => promise<game>,
+  getLatestGameId: array<Viem.address> => promise<gameId>,
+  getGame: ((Viem.address, gameId)) => promise<game>,
 }
 
 type writeFns = {
@@ -59,4 +64,26 @@ type writeFns = {
 }
 
 type instance = Viem.contractInstance<viewFns, writeFns>
-let getContract = (~client): instance => Viem.getContract({address, abi, client: {wallet: client}})
+
+let getContract = (~walletClient, ~publicClient): instance =>
+  Viem.getContract({
+    address,
+    abi,
+    client: {
+      wallet: walletClient,
+      public: publicClient,
+    },
+  })
+
+// @module("./testclient.mjs") external testclient: Viem.publicClient = "testclient"
+//
+// let contract: instance = Viem.getContract({
+//   address,
+//   abi,
+//   client: {public: testclient},
+// })
+//
+// let _ =
+//   contract.read.getLatestGameId([
+//     "0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
+//   ])->Promise.thenResolve(res => Console.log2("latest", res))

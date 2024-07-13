@@ -152,34 +152,24 @@ module DynamicWidget = {
   ) => React.element = "DynamicWidget"
 }
 
-/*
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
-
-const { primaryWallet } = useDynamicContext();
-
-const getBalance = async () => {
-  const publicClient = await primaryWallet?.connector?.getPublicClient();
-
-  // Now you can use the public client to read data from the blockchain
-  const balance = await publicClient?.getBalance(primaryWallet.address);
-  return balance
-}
-*/
-
 module Hooks = {
   type publicClient
   type walletClient
   type connector = {
-    getPublicClient: unit => promise<publicClient>,
-    getWalletClient: unit => promise<walletClient>,
+    getPublicClient: unit => promise<Viem.publicClient>,
+    getWalletClient: unit => Viem.walletClient,
+
   }
-  type primaryWallet = {connector?: connector}
+  type primaryWallet = {connector: Js.Nullable.t<connector>}
   type network = {networkChainId?: int, networkName?: string}
   type walletConnector = {
     supportsNetworkSwitching: unit => bool,
     switchNetwork: network => promise<unit>,
   }
-  type dynamicContext = {primaryWallet?: primaryWallet, walletConnector: walletConnector}
+  type dynamicContext = {
+    primaryWallet: Js.Nullable.t<primaryWallet>,
+    walletConnector: walletConnector,
+  }
 
   @module("@dynamic-labs/sdk-react-core")
   external useDynamicContext: unit => dynamicContext = "useDynamicContext"
