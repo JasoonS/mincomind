@@ -9,7 +9,9 @@
     "res:dev": "rescript -w",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vite:dev": "vite --clearScreen false",
+    "devu": "run-p --continue-on-error res:dev vite:dev"
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^2.3.1",
@@ -17,6 +19,8 @@
     "@glennsl/rescript-fetch": "^0.2.0",
     "@rescript/core": "^1.5.2",
     "@rescript/react": "^0.12.1",
+    "lit-html": "^3.1.4",
+    "npm-run-all2": "^6.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rescript": "^11.1.2",
