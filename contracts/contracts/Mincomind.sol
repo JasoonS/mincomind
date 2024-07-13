@@ -5,7 +5,7 @@ pragma solidity ^0.8.19;
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/Reencrypt.sol";
 
-contract MincoMind is Reencrypt {
+contract Mincomind is Reencrypt {
     constructor() Reencrypt() {}
 
     struct Game {
@@ -22,12 +22,18 @@ contract MincoMind is Reencrypt {
         uint8 cows;
     }
 
+    // user => gameId => Game
     mapping(address => mapping(uint32 => Game)) games;
+
+    // user => latestGameId
     mapping(address => uint32) latestGames;
+
+    // anyone can end the game after 10 minutes to transfer the deposit to the pot
+    uint16 constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
 
     event NewGame(address indexed player, uint32 gameId);
     event GuessAdded(address indexed player, uint32 gameId, uint8[4] guess);
-    event GameWon(address indexed player, uint32 gameId);
+    event GameOutcome(address indexed player, uint32 gameId, uint8 points);
 
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
@@ -39,6 +45,7 @@ contract MincoMind is Reencrypt {
     }
 
     function newGame() public {
+        require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -94,15 +101,18 @@ contract MincoMind is Reencrypt {
         emit GuessAdded(msg.sender, latestGames[msg.sender], guess);
     }
 
-    function claim() public {
-        Game storage game = games[msg.sender][latestGames[msg.sender]];
-        require(!game.isComplete, "Game is already complete");
-        Clue memory clue = checkGuessResult(msg.sender, latestGames[msg.sender], game.numGuesses - 1);
-
+    function endGame(address memory user) public {        
+        Game storage game = games[user][latestGames[user]];
+        require(!game.isComplete, "Game is already ended");
+        Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
+        
+        // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
+        require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
+        uint8 memory points = clue.bulls == 4 ? 9 - game.numGuesses : 0;
         require(clue.bulls == 4, "Guess is not correct");
 
         game.isComplete = true;
 
-        emit GameWon(msg.sender, latestGames[msg.sender]);
+        emit GameOutcome(msg.sender, latestGames[msg.sender], points);
     }
 }
