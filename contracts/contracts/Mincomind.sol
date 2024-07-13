@@ -31,8 +31,10 @@ contract Mincomind is Reencrypt {
     // user => points
     mapping(address => uint32) public points;
 
+    uint32 public totalPoints = 0;
+
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
-    uint16 constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
+     uint16 public constant MAX_SECONDS_PER_GAME  = 600; // 10 minutes
 
     event NewGame(address indexed player, uint32 gameId);
     event GuessAdded(address indexed player, uint32 gameId, uint8[4] guess);
@@ -45,6 +47,11 @@ contract Mincomind is Reencrypt {
             secret[i] = TFHE.shr(TFHE.randEuint8(), TFHE.asEuint8(5));
         }
         return secret;
+    }
+
+    function zeroPoints () external {        
+        totalPoints -= points[tx.origin];
+        points[tx.origin] = 0;
     }
 
     function newGame() public {
@@ -104,19 +111,24 @@ contract Mincomind is Reencrypt {
         emit GuessAdded(msg.sender, latestGames[msg.sender], guess);
     }
 
-    function endGame(address memory user) public {        
+    function endGame(address user) public {        
         Game storage game = games[user][latestGames[user]];
         require(!game.isComplete, "Game is already ended");
         Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
         
         // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
-        uint8 memory points = clue.bulls == 4 ? 9 - game.numGuesses : 0;
-        points[user] += points;
+        uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        points[user] += gamePoints;
+        totalPoints += gamePoints;
         require(clue.bulls == 4, "Guess is not correct");
 
         game.isComplete = true;
 
-        emit GameOutcome(msg.sender, latestGames[msg.sender], points);
+        // todo: transfer user deposit to pot
+
+        // todo: add secret reveal
+
+        emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
     }
 }
