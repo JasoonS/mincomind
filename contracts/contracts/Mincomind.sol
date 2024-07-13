@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause-Clear
 
-pragma solidity ^0.8.19;
+pragma solidity 0.8.22;
 
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/Reencrypt.sol";
+import "hardhat/console.sol";
 
 contract Mincomind is Reencrypt {
     constructor() Reencrypt() {}
@@ -33,29 +34,44 @@ contract Mincomind is Reencrypt {
 
     uint32 public totalPoints = 0;
 
-    // anyone can end the game after 10 minutes to transfer the deposit to the pot
-     uint16 public constant MAX_SECONDS_PER_GAME  = 600; // 10 minutes
+    // amount of funds in contract still locked in an active game
+    uint256 public lockedFunds = 0;
 
-    event NewGame(address indexed player, uint32 gameId);
-    event GuessAdded(address indexed player, uint32 gameId, uint8[4] guess);
-    event GameOutcome(address indexed player, uint32 gameId, uint8 points);
+    // anyone can end the game after 10 minutes to transfer the deposit to the pot
+    uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
+
+    uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
+
+    event NewGame(address indexed player, uint32 indexed gameId);
+    event GuessAdded(
+        address indexed player,
+        uint32 indexed gameId,
+        uint8 indexed numGuesses,
+        uint8[4] guess,
+        uint8 bulls,
+        uint8 cows
+    );
+    event GameOutcome(address indexed player, uint32 indexed gameId, uint8 points);
+    event FundsWithdrawn(address indexed player, uint256 amount);
 
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
         for (uint i = 0; i < secret.length; i++) {
-            // We bit shift it 5 places to make sure we only have 8 possible values.
-            secret[i] = TFHE.shr(TFHE.randEuint8(), TFHE.asEuint8(5));
+            // We take modulo 6 to make sure we only have 6 possible values.
+            secret[i] = TFHE.rem(TFHE.randEuint8(), 6);
         }
         return secret;
     }
 
-    function zeroPoints () external {        
-        totalPoints -= points[tx.origin];
-        points[tx.origin] = 0;
-    }
+    function newGame() public payable {
+        require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
+        if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0) {
+            require(
+                games[msg.sender][latestGames[msg.sender]].isComplete,
+                "Can't start new game before completing current game"
+            );
+        }
 
-    function newGame() public {
-        require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -66,6 +82,7 @@ contract Mincomind is Reencrypt {
             isComplete: false,
             timeStarted: uint32(block.timestamp)
         });
+        lockedFunds += DEPOSIT_AMOUNT;
         emit NewGame(msg.sender, latestGame);
     }
 
@@ -75,21 +92,31 @@ contract Mincomind is Reencrypt {
         require(game.lastGuessTimestamp < uint64(block.timestamp), "Can't view result in same block as guess");
         require(guessIndex < 8, "index too high");
 
-        ebool[4] memory used;
+        return compareArrays(game.secret, guess);
+    }
+
+    function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
+        ebool[4] memory usedByBulls;
         euint8 bulls;
-        for (uint i = 0; i < game.secret.length; i++) {
-            ebool isBull = TFHE.eq(game.secret[i], TFHE.asEuint8(guess[i]));
+        for (uint i = 0; i < secret.length; i++) {
+            ebool isBull = TFHE.eq(secret[i], TFHE.asEuint8(guess[i]));
             bulls = bulls + TFHE.cmux(isBull, TFHE.asEuint8(1), TFHE.asEuint8(0));
-            used[i] = isBull;
+            usedByBulls[i] = isBull;
         }
 
         euint8 cows;
-        for (uint i = 0; i < game.secret.length; i++) {
+        // We need to keep the used array for bulls separate from cows
+        ebool[4] memory used;
+        for (uint i = 0; i < secret.length; i++) {
+            used[i] = usedByBulls[i]; // need to make a copy and no longer mutate usedByBulls
+        }
+
+        for (uint i = 0; i < secret.length; i++) {
             ebool isCow = TFHE.asEbool(false);
-            for (uint j = 0; j < game.secret.length; j++) {
+            for (uint j = 0; j < secret.length; j++) {
                 ebool isCowFromCurrentCheck = TFHE.and(
-                    TFHE.and(TFHE.and(TFHE.not(used[i]), TFHE.not(used[j])), TFHE.not(isCow)),
-                    TFHE.ne(game.secret[j], TFHE.asEuint8(guess[i]))
+                    TFHE.and(TFHE.and(TFHE.not(usedByBulls[i]), TFHE.not(used[j])), TFHE.not(isCow)),
+                    TFHE.eq(secret[j], TFHE.asEuint8(guess[i]))
                 );
                 used[j] = TFHE.or(used[j], isCowFromCurrentCheck);
                 isCow = TFHE.or(isCow, isCowFromCurrentCheck);
@@ -108,27 +135,57 @@ contract Mincomind is Reencrypt {
         game.numGuesses += 1;
         game.lastGuessTimestamp = uint64(block.timestamp);
 
-        emit GuessAdded(msg.sender, latestGames[msg.sender], guess);
+        // NOTE the below line is only used for indexing - the smart contract get the return value to prevent manipulation (and reverting)
+        //      it isn't needed for the game to operate correctly, and uses more gas.
+        //      Before going to 'mainnet' this contract should check and make sure miner manipulation cannot allow miners to exploit this contract.
+        Clue memory guessHint = compareArrays(game.secret, guess);
+
+        emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess, guessHint.bulls, guessHint.cows);
     }
 
-    function endGame(address user) public {        
+    function endGame(address user) public {
         Game storage game = games[user][latestGames[user]];
         require(!game.isComplete, "Game is already ended");
         Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
-        
+
         // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
         uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
         points[user] += gamePoints;
         totalPoints += gamePoints;
-        require(clue.bulls == 4, "Guess is not correct");
 
         game.isComplete = true;
 
-        // todo: transfer user deposit to pot
+        lockedFunds -= DEPOSIT_AMOUNT;
 
         // todo: add secret reveal
 
         emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
+    }
+
+    function withdrawFunds() public {
+        uint32 userPoints = points[msg.sender];
+
+        uint256 pot = address(this).balance - lockedFunds;
+
+        uint256 amount = (pot * userPoints) / totalPoints;
+
+
+        // set points to 0 for user
+        totalPoints -= userPoints;
+        points[msg.sender] = 0;
+
+        // transfer funds to user
+        payable(msg.sender).transfer(amount);
+
+        emit FundsWithdrawn(msg.sender, amount);
+    }
+
+    function getLatestGameId(address user) public view returns (uint32) {
+        return latestGames[user];
+    }
+
+    function getGame(address user, uint32 gameId) public view returns (Game memory) {
+        return games[user][gameId];
     }
 }

@@ -4,19 +4,15 @@ contracts:
   - name: Game
     handler: ./src/EventHandlers.ts
     events:
-      - event: GameStarted(address player)
-      - event: GameOutcome(address player, uint32 points)
-  - name: Pot
-    handler: ./src/EventHandlers.ts
-    events:
-      - event: FundsWithdrawn(address player, uint32 amount)
+      - event: NewGame(address indexed player, uint32 indexed gameId)
+      - event: GameOutcome(address indexed player, uint32 indexed gameId, uint8 points)
+      - event: GuessAdded(address indexed player, uint32 indexed gameId, uint8 indexed numGuesses, uint8[4] guess, uint8 bulls, uint8 cows)
+      - event: FundsWithdrawn(address indexed player, uint256 amount)
 networks:
-  - id: 17077 # Inco
-    start_block: 2449015 # todo: update to when contracts are deployed
+  - id: 9090 # Inco
+    start_block: 2462556
     rpc_config:
       url: https://testnet.inco.org/
     contracts:
       - name: Game
-        address: # todo: update to when contracts are deployed
-      - name: Pot
-        address: # todo: update to when contracts are deployed
+        address: 0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5
