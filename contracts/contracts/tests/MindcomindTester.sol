@@ -88,7 +88,7 @@ contract FakeFHE {
     }
 }
 contract MincomindTester is Mincomind, FakeFHE {
-    constructor() Mincomind() {}
+    constructor() payable Mincomind() {}
 
     function initializeGameWithValues(uint8 first, uint8 second, uint8 third, uint8 fourth) public payable {
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
@@ -123,6 +123,17 @@ contract MincomindTester is Mincomind, FakeFHE {
         Game memory game = games[player][gameId];
 
         return compareArrays(game.secret, guess);
+    }
+
+    function compareArraysExposed(
+        uint8[4] calldata secretUnencrypted,
+        uint8[4] calldata guess
+    ) public view returns (Clue memory) {
+        euint8[4] memory secret;
+        for (uint i = 0; i < 4; i++) {
+            secret[i] = TFHE.asEuint8(secretUnencrypted[i]);
+        }
+        return compareArrays(secret, guess);
     }
 
     function viewSecret(address player, uint32 gameId) public view returns (uint8[4] memory) {
