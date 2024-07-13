@@ -1,22 +1,22 @@
 import {
   GameContract,
-  PotContract,
   PlayerEntity,
   TournamentEntity,
+  GameEntity,
 } from "generated";
 
 const TournamentID = "mincomind";
 const gameDepositAmount = BigInt(1); // todo: set once its known
 
-// - event: GameStarted(address player)
-GameContract.GameStarted.handler(async ({ event, context }) => {
+// - event: NewGame(address indexed player, uint32 gameId)
+GameContract.NewGame.handler(async ({ event, context }) => {
   let player: PlayerEntity | undefined = await context.Player.get(
     event.params.player
   );
 
   // new player, so create
   if (player === undefined) {
-    context.player.set({
+    context.Player.set({
       id: event.params.player,
       points: BigInt(0),
       numberOfGames: 0,
@@ -25,7 +25,7 @@ GameContract.GameStarted.handler(async ({ event, context }) => {
   }
   // player already exists, so update
   else {
-    context.player.set({
+    context.Player.set({
       ...player,
       numberOfGames: player.numberOfGames + 1,
       active: true,
@@ -36,20 +36,21 @@ GameContract.GameStarted.handler(async ({ event, context }) => {
   let tournament: TournamentEntity | undefined = await context.Tournament.get(
     TournamentID
   );
+
   if (tournament === undefined) {
-    context.tournament.set({
+    context.Tournament.set({
       id: TournamentID,
       pot: gameDepositAmount,
     });
   } else {
-    context.tournament.set({
+    context.Tournament.set({
       ...tournament,
       pot: tournament.pot + gameDepositAmount,
     });
   }
 });
 
-// - event: GameOutcome(address player, uint32 points) - 0 points implies the player didn't solve the game
+// - event: GameOutcome(address indexed player, uint32 gameId, uint8 points) - 0 points implies the player didn't solve the game
 GameContract.GameOutcome.handler(async ({ event, context }) => {
   let player: PlayerEntity | undefined = await context.Player.get(
     event.params.player
@@ -61,29 +62,62 @@ GameContract.GameOutcome.handler(async ({ event, context }) => {
   }
   // update players points
   else {
-    context.player.set({
+    context.Player.set({
       ...player,
       points: player.points + BigInt(event.params.points),
     });
   }
 });
 
-// - event: FundsWithdrawn(address player, uint32 amount)
-PotContract.FundsWithdrawn.handler(async ({ event, context }) => {
+// - event: FundsWithdrawn(address player, uint256 amount)
+GameContract.FundsWithdrawn.handler(async ({ event, context }) => {
   let player: PlayerEntity | undefined = await context.Player.get(
     event.params.player
   );
 
   // this shouldnt be possible
   if (player === undefined) {
-    context.log.error("Player not found");
+    context.log.info("Someone wasting gas to withdraw no funds");
   }
   // player has withdrawn all funds, so deactivate
   else {
-    context.player.set({
+    context.Player.set({
       ...player,
       points: BigInt(0),
       active: false,
+    });
+  }
+});
+
+// - event: GuessAdded(address indexed player, uint32 gameId, uint8 numGuesses, uint8[4] guess)
+GameContract.GuessAdded.handler(async ({ event, context }) => {
+  let game: GameEntity | undefined = await context.Game.get(
+    event.params.player + "-" + event.params.gameId
+  );
+
+  context.Guess.set({
+    id:
+      event.params.player +
+      "-" +
+      event.params.gameId +
+      "-" +
+      event.params.numGuesses,
+    gameIdLink: event.params.player + "-" + String(event.params.gameId),
+    player: event.params.player,
+    gameId: String(event.params.gameId),
+    attempt: Number(event.params.numGuesses),
+    guessPos0: Number(event.params.guess[0]),
+    guessPos1: Number(event.params.guess[1]),
+    guessPos2: Number(event.params.guess[2]),
+    guessPos3: Number(event.params.guess[3]),
+  });
+
+  // if undefined, create new game
+  if (game === undefined) {
+    context.Game.set({
+      id: event.params.player + "-" + event.params.gameId,
+      player: event.params.player,
+      gameId: String(event.params.gameId),
     });
   }
 });
