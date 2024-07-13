@@ -7,7 +7,7 @@ import { createTransaction } from "../utils";
 import { deployMincomindFixture, deployMincomindFixtureTester, deployFakeFHEFixture } from "./Mincomind.fixture";
 import exp from "constants";
 
-describe.only("MincomindAlgo", function () {
+describe("MincomindAlgo", function () {
   before(async function () {
     this.signers = await getSigners(ethers);
   });
@@ -18,137 +18,137 @@ describe.only("MincomindAlgo", function () {
 
   // not working with payable value
   it("Test values are correct - Case 1", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [1, 3, 5, 3];
     const expected = [1n, 1n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 2", async function () {
     const check = [4, 3, 2, 1];
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const expected = [0n, 4n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 3", async function () {
-    const input = [1, 1, 1, 1];
+    const secret = [1, 1, 1, 1];
     const check = [1, 1, 1, 1];
     const expected = [4n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 4", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [1, 2, 3, 4];
     const expected = [4n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 5", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [0, 0, 0, 0];
     const expected = [0n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 6", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [2, 1, 1, 1];
     const expected = [0n, 2n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 7", async function () {
-    const input = [4, 4, 4, 4];
+    const secret = [4, 4, 4, 4];
     const check = [1, 1, 1, 1];
     const expected = [0n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 8", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [2, 1, 4, 3];
     const expected = [0n, 4n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 9", async function () {
-    const input = [1, 2, 2, 2];
+    const secret = [1, 2, 2, 2];
     const check = [2, 4, 3, 3];
     const expected = [0n, 1n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 10", async function () {
-    const input = [1, 2, 3, 4];
+    const secret = [1, 2, 3, 4];
     const check = [5, 6, 7, 8];
     const expected = [0n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 11", async function () {
-    const input = [5, 6, 7, 7];
+    const secret = [5, 6, 7, 7];
     const check = [5, 6, 7, 5];
     const expected = [3n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 12", async function () {
-    const input = [5, 6, 7, 0];
+    const secret = [5, 6, 7, 0];
     const check = [0, 7, 6, 5];
     const expected = [0n, 4n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 13", async function () {
-    const input = [5, 5, 5, 5];
+    const secret = [5, 5, 5, 5];
     const check = [5, 5, 5, 5];
     const expected = [4n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 14", async function () {
-    const input = [5, 5, 5, 5];
+    const secret = [5, 5, 5, 5];
     const check = [6, 6, 6, 6];
     const expected = [0n, 0n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
   it("Test values are correct - Case 15", async function () {
-    const input = [1, 1, 2, 2];
+    const secret = [1, 1, 2, 2];
     const check = [2, 2, 1, 1];
     const expected = [0n, 4n];
 
-    const result = await this.algorithmTester.compareArraysDebug(input, check);
+    const result = await this.algorithmTester.compareArraysDebug(secret, check);
     expect(result).to.deep.equal(expected);
   });
 
@@ -168,11 +168,12 @@ describe("Mincomind", function () {
   });
 
   before(async function () {
+    console.log("Deploying contract");
     this.mincomind = await deployMincomindFixture();
     this.mincomindTester = await deployMincomindFixtureTester();
     console.log("Contract deployed at", await this.mincomindTester.getAddress());
     this.contractAddress = await this.mincomind.getAddress();
-    this.instances = await createInstances(this.contractAddress, ethers, this.signers);
+    // this.instances = await createInstances(this.contractAddress, ethers, this.signers);
 
     // this.mincomindTester = await ethers.getContractAt("MincomindTester", "0xC2442E72225CF876bE28fcf16736A445CE30a2B4");
   });
@@ -189,68 +190,187 @@ describe("Mincomind", function () {
     console.log("TX submitted")
     await tx.wait();
     console.log("TX mined")
-    // let totalPoints = await this.mincomindTester.totalPoints();
+    let totalPoints = await this.mincomindTester.totalPoints();
 
-    // console.log("TX total points")
-    // const secret = await this.mincomindTester.viewSecret(this.signers.alice.address, 1);
-    // console.log("secret", secret);
-    // expect(totalPoints).to.equal(0);
-
-    // await this.mincomindTester
-    //   .connect(this.signers.alice)
-    //   .addGuess([1, 3, 5, 3]);
-
-    const check1 = [1, 3, 5, 3];
-    const check2 = [1, 2, 3, 4];
-    const check3 = [3, 1, 5, 6]
-
-
-    const result1 = await Promise.all([this.mincomindTester.checkGuessedResultHacked(this.signers.alice.address, 1, check1), this.mincomindTester.compareArraysDebug([1, 2, 3, 4], check1)]);
-    const result2 = await Promise.all([this.mincomindTester.checkGuessedResultHacked(this.signers.alice.address, 1, check2), this.mincomindTester.compareArraysDebug([1, 2, 3, 4], check2)]);
-    const result3 = await Promise.all([this.mincomindTester.checkGuessedResultHacked(this.signers.alice.address, 1, check3), this.mincomindTester.compareArraysDebug([1, 2, 3, 4], check3)]);
-    console.log({ result1, result2, result3 });
+    console.log("TX total points")
+    const secret = await this.mincomindTester.viewSecret(this.signers.alice.address, 1);
+    console.log("secret", secret);
+    expect(totalPoints).to.equal(1);
   });
 
-  // it("should mint the contract", async function () {
-  // const encryptedAmount = this.instances.alice.encrypt32(1000);
-  // const transaction = await createTransaction(this.erc20.mint, encryptedAmount);
-  // await transaction.wait();
-  // // Call the method
-  // const token = this.instances.alice.getTokenSignature(this.contractAddress) || {
-  //   signature: "",
-  //   publicKey: "",
-  // };
-  // const encryptedBalance = await this.erc20.balanceOf(token.publicKey, token.signature);
-  // // Decrypt the balance
-  // const balance = this.instances.alice.decrypt(this.contractAddress, encryptedBalance);
-  // expect(balance).to.equal(1000);
-  // const encryptedTotalSupply = await this.erc20.getTotalSupply(token.publicKey, token.signature);
-  // // Decrypt the total supply
-  // const totalSupply = this.instances.alice.decrypt(this.contractAddress, encryptedTotalSupply);
-  // expect(totalSupply).to.equal(1000);
-  // });
+  it("Check the encrypted and non encrypted functions return the same thing - Case 1", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [1, 3, 5, 3];
 
-  // it("should transfer tokens between two users", async function () {
-  // const encryptedAmount = this.instances.alice.encrypt32(10000);
-  // const transaction = await createTransaction(this.erc20.mint, encryptedAmount);
-  // await transaction.wait();
-  // const encryptedTransferAmount = this.instances.alice.encrypt32(1337);
-  // const tx = await createTransaction(
-  //   this.erc20["transfer(address,bytes)"],
-  //   this.signers.bob.address,
-  //   encryptedTransferAmount,
-  // );
-  // await tx.wait();
-  // const tokenAlice = this.instances.alice.getTokenSignature(this.contractAddress)!;
-  // const encryptedBalanceAlice = await this.erc20.balanceOf(tokenAlice.publicKey, tokenAlice.signature);
-  // // Decrypt the balance
-  // const balanceAlice = this.instances.alice.decrypt(this.contractAddress, encryptedBalanceAlice);
-  // expect(balanceAlice).to.equal(10000 - 1337);
-  // const bobErc20 = this.erc20.connect(this.signers.bob);
-  // const tokenBob = this.instances.bob.getTokenSignature(this.contractAddress)!;
-  // const encryptedBalanceBob = await bobErc20.balanceOf(tokenBob.publicKey, tokenBob.signature);
-  // // Decrypt the balance
-  // const balanceBob = this.instances.bob.decrypt(this.contractAddress, encryptedBalanceBob);
-  // expect(balanceBob).to.equal(1337);
-  // });
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 2", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [4, 3, 2, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 3", async function () {
+    const secret = [1, 1, 1, 1];
+    const check = [1, 1, 1, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 4", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [1, 2, 3, 4];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 5", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [0, 0, 0, 0];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 6", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [2, 1, 1, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 7", async function () {
+    const secret = [4, 4, 4, 4];
+    const check = [1, 1, 1, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 8", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [2, 1, 4, 3];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 9", async function () {
+    const secret = [1, 2, 2, 2];
+    const check = [2, 4, 3, 3];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 10", async function () {
+    const secret = [1, 2, 3, 4];
+    const check = [5, 6, 7, 8];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 11", async function () {
+    const secret = [5, 6, 7, 7];
+    const check = [5, 6, 7, 5];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 12", async function () {
+    const secret = [5, 6, 7, 0];
+    const check = [0, 7, 6, 5];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 13", async function () {
+    const secret = [5, 5, 5, 5];
+    const check = [5, 5, 5, 5];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 14", async function () {
+    const secret = [5, 5, 5, 5];
+    const check = [6, 6, 6, 6];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 15", async function () {
+    const secret = [1, 1, 2, 2];
+    const check = [2, 2, 1, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
+
+  it("Check the encrypted and non encrypted functions return the same thing - Case 16", async function () {
+    const secret = [1, 1, 3, 4];
+    const check = [2, 2, 1, 1];
+
+    const result = await Promise.all([
+      this.mincomindTester.compareArraysExposed(secret, check),
+      this.mincomindTester.compareArraysDebug(secret, check)
+    ]);
+    expect(result[0]).to.deep.equal(result[1]);
+  });
 });

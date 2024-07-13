@@ -7,6 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const deployed = await deploy("Mincomind", {
     from: deployer,
+    value: "1000000000000000",
     args: [],
     log: true,
   });

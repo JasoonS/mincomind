@@ -7,7 +7,13 @@ import "fhevm/abstracts/Reencrypt.sol";
 import "hardhat/console.sol";
 
 contract Mincomind is Reencrypt {
-    constructor() Reencrypt() {}
+    constructor() payable Reencrypt() {
+        require(msg.value == DEPOSIT_AMOUNT, "Initial liquidity must be exactly 0.001 ether");
+
+        totalPoints = 1;
+
+        lockedFunds = DEPOSIT_AMOUNT;
+    }
 
     struct Game {
         euint8[4] secret;
@@ -24,18 +30,18 @@ contract Mincomind is Reencrypt {
     }
 
     // user => gameId => Game
-    mapping(address => mapping(uint32 => Game)) games;
+    mapping(address => mapping(uint32 => Game)) public games;
 
     // user => latestGameId
-    mapping(address => uint32) latestGames;
+    mapping(address => uint32) public latestGames;
 
     // user => points
     mapping(address => uint32) public points;
 
-    uint32 public totalPoints = 0;
+    uint32 public totalPoints;
 
     // amount of funds in contract still locked in an active game
-    uint256 public lockedFunds = 0;
+    uint256 public lockedFunds;
 
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
     uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
