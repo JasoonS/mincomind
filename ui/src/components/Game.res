@@ -61,6 +61,35 @@ module Guess = {
   type guessInput = t<option<colour>>
 }
 
+module SolutionRow = {
+  @react.component
+  let make = () => {
+    <div className="bg-blue-300 flex items-center border w-full">
+      <div className="w-14 grid grid-cols-2 gap-1 p-1">
+        <div className="text-white opacity-40 pr-4"> {"solution"->React.string} </div>
+      </div>
+      <div className="flex gap-1 mx-auto items-center p-2 text-white">
+        <div
+          className={`border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400`}>
+          <span className="text-center m-4"> {"?"->React.string} </span>
+        </div>
+        <div
+          className={`border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400`}>
+          <span className="text-center m-4"> {"?"->React.string} </span>
+        </div>
+        <div
+          className={`border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400`}>
+          <span className="text-center m-4"> {"?"->React.string} </span>
+        </div>
+        <div
+          className={`border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400`}>
+          <span className="text-center m-4"> {"?"->React.string} </span>
+        </div>
+      </div>
+    </div>
+  }
+}
+
 module GuessRow = {
   @react.component
   let make = (~guess: Guess.guess, ~attempt: int) => {
@@ -174,18 +203,23 @@ module ColorSelector = {
       }
     }
 
-    <div className="flex gap-1 justify-between p-2">
-      {colors
-      ->Array.mapWithIndex((c, i) => {
-        <div
-          key={i->Int.toString}
-          onClick={_ => setSelectedColor(_ => c)}
-          className={` h-10 w-10 drop-shadow-md rounded-full ${getBgColor(
-              c,
-            )} pointer hover:brightness-20 `}
-        />
-      })
-      ->React.array}
+    <div className="flex flex-col items-center w-full">
+      <div className="flex gap-1 justify-between p-2">
+        {colors
+        ->Array.mapWithIndex((c, i) => {
+          <div
+            key={i->Int.toString}
+            onClick={_ => setSelectedColor(_ => c)}
+            className={` h-10 w-10 drop-shadow-md rounded-full ${getBgColor(
+                c,
+              )} pointer hover:brightness-20 `}
+          />
+        })
+        ->React.array}
+      </div>
+      <p className="text-white text-center text-xs leading-tight">
+        {`Click a colour, then click on a circle to select`->React.string}
+      </p>
     </div>
   }
 }
@@ -230,13 +264,12 @@ let resultToOption = result =>
   | Error(_) => None
   }
 
-let mockGuesses: array<Guess.guess> =
-  [
-    makeGuess(~guess=Guess.make(Blue, Red, Orange, Yellow), ~cows=1, ~bulls=1),
-    makeGuess(~guess=Guess.make(Purple, Red, Yellow, Green), ~cows=2, ~bulls=0),
-    makeGuess(~guess=Guess.make(Blue, Blue, Orange, Orange), ~cows=0, ~bulls=3),
-    makeGuess(~guess=Guess.make(Yellow, Yellow, Orange, Orange), ~cows=2, ~bulls=2),
-  ]->Array.filterMap(resultToOption)
+let mockGuesses: array<Guess.guess> = [
+  makeGuess(~guess=Guess.make(Blue, Red, Orange, Yellow), ~cows=1, ~bulls=1),
+  makeGuess(~guess=Guess.make(Purple, Red, Yellow, Green), ~cows=2, ~bulls=0),
+  makeGuess(~guess=Guess.make(Blue, Blue, Orange, Orange), ~cows=0, ~bulls=3),
+  // makeGuess(~guess=Guess.make(Yellow, Yellow, Orange, Orange), ~cows=2, ~bulls=2),
+]->Array.filterMap(resultToOption)
 
 // let emptyBoard: array<Guess.guessInput> =
 //   [
@@ -259,14 +292,17 @@ let make = (~walletClient: Viem.walletClient, ~publicClient) => {
   Console.log2("latestGameId", latestGameId)
 
   let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
+
+  let grid = [0, 1, 2, 3, 4, 5, 6, 7] // hacky but working to show the full grid
+
   let (selectedColor, setSelectedColor) = React.useState(_ => Red)
   <div className="flex flex-col items-center max-w-md mx-auto rounded px-8">
     <div>
-      // todo
-      <EmptyRow />
-      <EmptyRow />
-      <EmptyRow />
-      <EmptyRow />
+      <SolutionRow />
+      {grid
+      ->Js.Array2.slice(~start=0, ~end_=8 - guesses->Array.length)
+      ->Array.map(_ => <EmptyRow />)
+      ->React.array}
       {guesses
       ->Array.mapWithIndex((guess, i) => {
         <GuessRow key={i->Int.toString} guess attempt={i} />

@@ -102,6 +102,58 @@ var Guess = {
   toArray: toArray
 };
 
+function Game$SolutionRow(props) {
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: JsxRuntime.jsx("div", {
+                            children: "solution",
+                            className: "text-white opacity-40 pr-4"
+                          }),
+                      className: "w-14 grid grid-cols-2 gap-1 p-1"
+                    }),
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: JsxRuntime.jsx("span", {
+                                    children: "?",
+                                    className: "text-center m-4"
+                                  }),
+                              className: "border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: JsxRuntime.jsx("span", {
+                                    children: "?",
+                                    className: "text-center m-4"
+                                  }),
+                              className: "border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: JsxRuntime.jsx("span", {
+                                    children: "?",
+                                    className: "text-center m-4"
+                                  }),
+                              className: "border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: JsxRuntime.jsx("span", {
+                                    children: "?",
+                                    className: "text-center m-4"
+                                  }),
+                              className: "border flex items-center h-10 w-10 drop-shadow-md rounded-full bg-gray-400"
+                            })
+                      ],
+                      className: "flex gap-1 mx-auto items-center p-2 text-white"
+                    })
+              ],
+              className: "bg-blue-300 flex items-center border w-full"
+            });
+}
+
+var SolutionRow = {
+  make: Game$SolutionRow
+};
+
 function Game$GuessRow(props) {
   var guess = props.guess;
   return JsxRuntime.jsxs("div", {
@@ -259,18 +311,27 @@ function Game$ColorSelector(props) {
       return bgColor;
     }
   };
-  return JsxRuntime.jsx("div", {
-              children: colors.map(function (c, i) {
-                    return JsxRuntime.jsx("div", {
-                                className: " h-10 w-10 drop-shadow-md rounded-full " + getBgColor$2(c) + " pointer hover:brightness-20 ",
-                                onClick: (function (param) {
-                                    setSelectedColor(function (param) {
-                                          return c;
-                                        });
-                                  })
-                              }, i.toString());
-                  }),
-              className: "flex gap-1 justify-between p-2"
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: colors.map(function (c, i) {
+                            return JsxRuntime.jsx("div", {
+                                        className: " h-10 w-10 drop-shadow-md rounded-full " + getBgColor$2(c) + " pointer hover:brightness-20 ",
+                                        onClick: (function (param) {
+                                            setSelectedColor(function (param) {
+                                                  return c;
+                                                });
+                                          })
+                                      }, i.toString());
+                          }),
+                      className: "flex gap-1 justify-between p-2"
+                    }),
+                JsxRuntime.jsx("p", {
+                      children: "Click a colour, then click on a circle to select",
+                      className: "text-white text-center text-xs leading-tight"
+                    })
+              ],
+              className: "flex flex-col items-center w-full"
             });
 }
 
@@ -340,13 +401,7 @@ var mockGuesses = Core__Array.filterMap([
             _1: 4,
             _2: 1,
             _3: 1
-          }, 0, 3),
-      makeGuess({
-            _0: 2,
-            _1: 2,
-            _2: 1,
-            _3: 1
-          }, 2, 2)
+          }, 0, 3)
     ], resultToOption);
 
 function Game(props) {
@@ -357,6 +412,17 @@ function Game(props) {
   var match = React.useState(function () {
         return mockGuesses;
       });
+  var guesses = match[0];
+  var grid = [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ];
   var match$1 = React.useState(function () {
         return 0;
       });
@@ -364,11 +430,11 @@ function Game(props) {
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("div", {
                     children: [
-                      JsxRuntime.jsx(Game$EmptyRow, {}),
-                      JsxRuntime.jsx(Game$EmptyRow, {}),
-                      JsxRuntime.jsx(Game$EmptyRow, {}),
-                      JsxRuntime.jsx(Game$EmptyRow, {}),
-                      match[0].map(function (guess, i) {
+                      JsxRuntime.jsx(Game$SolutionRow, {}),
+                      grid.slice(0, 8 - guesses.length | 0).map(function (param) {
+                            return JsxRuntime.jsx(Game$EmptyRow, {});
+                          }),
+                      guesses.map(function (guess, i) {
                             return JsxRuntime.jsx(Game$GuessRow, {
                                         guess: guess,
                                         attempt: i
@@ -393,6 +459,7 @@ export {
   getBgColor ,
   CowsAndBulls ,
   Guess ,
+  SolutionRow ,
   GuessRow ,
   GuessCreator ,
   ColorSelector ,
