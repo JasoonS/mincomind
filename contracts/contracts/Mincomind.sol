@@ -71,10 +71,7 @@ contract Mincomind is Reencrypt {
                 "Can't start new game before completing current game"
             );
         }
-        // require(
-        //     games[msg.sender][latestGames[msg.sender]].isComplete,
-        //     "Can't start new game before completing current game"
-        // );
+
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -99,20 +96,26 @@ contract Mincomind is Reencrypt {
     }
 
     function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
-        ebool[4] memory used;
+        ebool[4] memory usedByBulls;
         euint8 bulls;
         for (uint i = 0; i < secret.length; i++) {
             ebool isBull = TFHE.eq(secret[i], TFHE.asEuint8(guess[i]));
             bulls = bulls + TFHE.cmux(isBull, TFHE.asEuint8(1), TFHE.asEuint8(0));
-            used[i] = isBull;
+            usedByBulls[i] = isBull;
         }
 
         euint8 cows;
+        // We need to keep the used array for bulls separate from cows
+        ebool[4] memory used;
+        for (uint i = 0; i < secret.length; i++) {
+            used[i] = usedByBulls[i]; // need to make a copy and no longer mutate usedByBulls
+        }
+
         for (uint i = 0; i < secret.length; i++) {
             ebool isCow = TFHE.asEbool(false);
             for (uint j = 0; j < secret.length; j++) {
                 ebool isCowFromCurrentCheck = TFHE.and(
-                    TFHE.and(TFHE.and(TFHE.not(used[i]), TFHE.not(used[j])), TFHE.not(isCow)),
+                    TFHE.and(TFHE.and(TFHE.not(usedByBulls[i]), TFHE.not(used[j])), TFHE.not(isCow)),
                     TFHE.eq(secret[j], TFHE.asEuint8(guess[i]))
                 );
                 used[j] = TFHE.or(used[j], isCowFromCurrentCheck);
@@ -165,11 +168,7 @@ contract Mincomind is Reencrypt {
 
         uint256 pot = address(this).balance - lockedFunds;
 
-        uint256 amount = (((userPoints * 10e18) / totalPoints) * pot) / 10e18;
-
-        // uint256 precision = 1; /// I don't think precission is needed please test me! Can add more later.
-
-        // uint256 amount = (pot * userPoints * precision) / (totalPoints * precision);
+        uint256 amount = (pot * userPoints) / totalPoints;
 
         // set points to 0 for user
         totalPoints -= userPoints;
