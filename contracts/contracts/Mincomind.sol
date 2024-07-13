@@ -4,6 +4,7 @@ pragma solidity 0.8.22;
 
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/Reencrypt.sol";
+import "hardhat/console.sol";
 
 contract Mincomind is Reencrypt {
     constructor() Reencrypt() {}
@@ -37,8 +38,8 @@ contract Mincomind is Reencrypt {
     uint256 public lockedFunds = 0;
 
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
-     uint16 public constant MAX_SECONDS_PER_GAME  = 600; // 10 minutes
-     uint256 public constant DEPOSIT_AMOUNT = 0.001 ether; // 1_000_000_000_000_000 wei
+    uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
+    uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
 
     event NewGame(address indexed player, uint32 gameId);
     event GuessAdded(address indexed player, uint32 gameId, uint8 numGuesses, uint8[4] guess);
@@ -48,17 +49,25 @@ contract Mincomind is Reencrypt {
     function generateSecret() private view returns (euint8[4] memory) {
         euint8[4] memory secret;
         for (uint i = 0; i < secret.length; i++) {
-            // We bit shift it 5 places to make sure we only have 8 possible values.
-            secret[i] = TFHE.shr(TFHE.randEuint8(), TFHE.asEuint8(5));
+            // We take modulo 6 to make sure we only have 6 possible values.
+            secret[i] = TFHE.rem(TFHE.randEuint8(), 6);
         }
         return secret;
     }
 
-    function newGame() public payable{
+    function newGame() public payable {
+        // console.log("Deploy values", msg.value, DEPOSIT_AMOUNT);
         require(msg.value == DEPOSIT_AMOUNT, "You must deposit exactly 0.001 inco tokens");
-        if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0){
-         require(games[msg.sender][latestGames[msg.sender]].isComplete, "Can't start new game before completing current game");
+        if (games[msg.sender][latestGames[msg.sender]].timeStarted > 0) {
+            require(
+                games[msg.sender][latestGames[msg.sender]].isComplete,
+                "Can't start new game before completing current game"
+            );
         }
+        // require(
+        //     games[msg.sender][latestGames[msg.sender]].isComplete,
+        //     "Can't start new game before completing current game"
+        // );
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -115,18 +124,18 @@ contract Mincomind is Reencrypt {
         emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess);
     }
 
-    function endGame(address user) public {        
+    function endGame(address user) public {
         Game storage game = games[user][latestGames[user]];
         require(!game.isComplete, "Game is already ended");
         Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
-        
+
         // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
         require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
         uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
         points[user] += gamePoints;
-        totalPoints += gamePoints;        
+        totalPoints += gamePoints;
 
-        game.isComplete = true;        
+        game.isComplete = true;
 
         lockedFunds -= DEPOSIT_AMOUNT;
 
@@ -135,12 +144,16 @@ contract Mincomind is Reencrypt {
         emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
     }
 
-     function withdrawFunds() public {
+    function withdrawFunds() public {
         uint32 userPoints = points[msg.sender];
-        
-        uint256 pot = address(this).balance - lockedFunds;         
-        
-        uint256 amount = ((userPoints * 10e18 / totalPoints) * pot) / 10e18;
+
+        uint256 pot = address(this).balance - lockedFunds;
+
+        uint256 amount = (((userPoints * 10e18) / totalPoints) * pot) / 10e18;
+
+        // uint256 precision = 1; /// I don't think precission is needed please test me! Can add more later.
+
+        // uint256 amount = (pot * userPoints * precision) / (totalPoints * precision);
 
         // set points to 0 for user
         totalPoints -= userPoints;

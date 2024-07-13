@@ -12,3 +12,13 @@ export async function deployMincomindFixture(): Promise<Mincomind> {
 
   return contract;
 }
+
+export async function deployMincomindFixtureTester(): Promise<Mincomind> {
+  const signers = await getSigners(ethers);
+
+  const contractFactory = await ethers.getContractFactory("MincomindTester");
+  const contract = await contractFactory.connect(signers.alice).deploy();
+  await contract.waitForDeployment();
+
+  return contract;
+}

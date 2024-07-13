@@ -4,31 +4,37 @@ import { ethers } from "hardhat";
 import { createInstances } from "../instance";
 import { getSigners } from "../signers";
 import { createTransaction } from "../utils";
-import { deployMincomindFixture } from "./Mincomind.fixture";
+import { deployMincomindFixture, deployMincomindFixtureTester } from "./Mincomind.fixture";
 
 describe("Mincomind", function () {
   before(async function () {
     this.signers = await getSigners(ethers);
   });
 
-  beforeEach(async function () {
-    const contract = await deployMincomindFixture();
-    this.contractAddress = await contract.getAddress();
-    this.mincomind = contract;
-    this.instances = await createInstances(this.contractAddress, ethers, this.signers);
+  before(async function () {
+    // this.mincomind = await deployMincomindFixture();
+    this.mincomindTester = await deployMincomindFixtureTester();
+    console.log("Contract deployed at", await this.mincomindTester.getAddress());
+    // this.contractAddress = await this.mincomind.getAddress();
+    // this.instances = await createInstances(this.contractAddress, ethers, this.signers);
   });
 
   it("deployed contract exists", async function () {
-    expect(this.mincomind).to.exist;
+    expect(this.mincomindTester).to.exist;
   });
 
   // not working with payable value
-  // it("new game should create a new game", async function () {
-  //   const tx = await createTransaction(this.mincomind.newGame, BigInt("1000000000000000"));
-  //   await tx.wait();
-  //   let totalPoints = await this.mincomind.totalPoints();
-  //   expect(totalPoints).to.equal(0);
-  // });
+  it("new game should create a new game", async function () {
+    console.log("running create transaction");
+    // const tx = await createTransaction(this.mincomindTester.connect(this.signers.alice).initializeGameWithValues, BigInt("1000000000000000"), 1, 2, 3, 4);
+    const tx = await this.mincomindTester.connect(this.signers.alice).initializeGameWithValues(1, 2, 3, 4, { value: BigInt("1000000000000000") });
+    await tx.wait();
+    let totalPoints = await this.mincomindTester.totalPoints();
+
+    const secret = await this.mincomindTester.viewSecret(this.signers.alice.address, 0);
+    console.log("secret", secret);
+    expect(totalPoints).to.equal(0);
+  });
 
   // it("should mint the contract", async function () {
   // const encryptedAmount = this.instances.alice.encrypt32(1000);
