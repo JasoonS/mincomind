@@ -19,4 +19,11 @@ type contractArgs = {
   client: clientOpts,
 }
 
-@module("viem") external getContract: contractArgs => 'a = "getContract"
+type contractInstance<'viewFns, 'writeFns> = {
+  read: 'viewFns,
+  write: 'writeFns,
+}
+
+@module("viem") external getContract: contractArgs => contractInstance<'a, 'b> = "getContract"
+
+@module("viem") external parseAbiUnsafe: string => abi = "parseAbi"

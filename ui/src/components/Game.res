@@ -189,7 +189,6 @@ let mockGuesses: array<Guess.guess> =
 
 @react.component
 let make = () => {
-  let d = Dynamic.Hooks.useDynamicContext()
   let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
   let (selectedColor, setSelectedColor) = React.useState(_ => Red)
   <div className="flex flex-col items-center max-w-md">

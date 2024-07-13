@@ -7,7 +7,6 @@ import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Result from "@rescript/core/src/Core__Result.res.mjs";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 import * as JsxRuntime from "react/jsx-runtime";
-import * as SdkReactCore from "@dynamic-labs/sdk-react-core";
 
 function getBgColor(colour) {
   switch (colour) {
@@ -306,7 +305,6 @@ var mockGuesses = Core__Array.filterMap([
     ], resultToOption);
 
 function Game(props) {
-  SdkReactCore.useDynamicContext();
   var match = React.useState(function () {
         return mockGuesses;
       });

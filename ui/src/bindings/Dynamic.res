@@ -51,11 +51,9 @@ const getBalance = async () => {
 */
 
 module Hooks = {
-  type publicClient
-  type walletClient
   type connector = {
-    getPublicClient: unit => promise<publicClient>,
-    getWalletClient: unit => promise<walletClient>,
+    getPublicClient: unit => promise<Viem.publicClient>,
+    getWalletClient: unit => promise<Viem.walletClient>,
   }
   type primaryWallet = {connector?: connector}
   type dynamicContext = {primaryWallet?: primaryWallet}
