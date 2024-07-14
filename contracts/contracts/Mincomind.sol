@@ -164,8 +164,6 @@ contract Mincomind is Reencrypt {
 
         lockedFunds -= DEPOSIT_AMOUNT;
 
-        // todo: add secret reveal
-
         emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
     }
 
