@@ -22,7 +22,7 @@ function Home(props) {
                     }),
                 JsxRuntime.jsx(ActionButtons.WithdrawFundsActionButton.make, {
                       onAction: (function (param) {
-                          console.log("withdraw funds");
+                          mincomind.write.withdrawFunds();
                         })
                     })
               ],

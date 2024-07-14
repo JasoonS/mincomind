@@ -16,9 +16,9 @@ function App(props) {
   var setPage = match[1];
   var tmp;
   if (typeof client !== "object") {
-    tmp = "loading...";
+    tmp = null;
   } else if (client.TAG === "Err") {
-    tmp = "Error getting client check console...";
+    tmp = "Error getting client, check console...";
   } else {
     var walletClient = client._0;
     var mincomind = Mincomind.getContract(walletClient);

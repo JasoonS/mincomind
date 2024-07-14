@@ -107,7 +107,10 @@ module CluePegs = {
         />
       })
       ->React.array
-    | Loading => "Loading clue..."->React.string
+    | Loading =>
+      <div className="w-full flex justify-center items-center">
+        <Spinner />
+      </div>
     | Err(_exn) => "Error loading clue..."->React.string
     }
   }
@@ -116,14 +119,15 @@ module CluePegs = {
 module GuessRow = {
   @react.component
   let make = (~guess: Guess.t, ~attempt: int, ~user, ~gameId, ~mincomind) => {
-    let clue: ContractHooks.response<Clue.t> = ContractHooks.Loading
     <div className="bg-blue-300 flex items-center border w-full">
       <div className="w-14 grid grid-cols-2 gap-1 border p-1">
         <CluePegs user gameId attempt mincomind />
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
-        <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
-        <div className="text-white opacity-40 pr-4"> {attempt->Int.toString->React.string} </div>
+        // <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
+        <div className="text-white opacity-40 pr-4">
+          {(attempt + 1)->Int.toString->React.string}
+        </div>
         {guess
         ->Guess.toArray
         ->Array.mapWithIndex((c, i) => {

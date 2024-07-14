@@ -31,8 +31,8 @@ let make = () => {
       | Game => <Game user mincomind />
       | Leaderboard => <Table mincomind client={walletClient} />
       }
-    | Loading => "loading..."->React.string
-    | Err(_) => "Error getting client check console..."->React.string
+    | Loading => React.null //"loading..."->React.string
+    | Err(_) => "Error getting client, check console..."->React.string
     }}
   </div>
 }
