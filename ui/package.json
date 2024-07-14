@@ -11,16 +11,19 @@
     "build": "vite build",
     "preview": "vite preview",
     "vite:dev": "vite --clearScreen false",
-    "devu": "run-p --continue-on-error res:dev vite:dev"
+    "devu": "run-p --continue-on-error res:dev vite:dev",
+    "update-schema": "gq https://indexer.staging.bigdevenergy.link/b13f675/v1/graphql --introspect > schema.graphql && rescript clean"
   },
   "dependencies": {
     "@glennsl/rescript-fetch": "^0.2.0",
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@dynamic-labs/ethereum": "3.0.0-alpha.19",
     "@dynamic-labs/sdk-react-core": "3.0.0-alpha.19",
     "@dynamic-labs/viem-utils": "3.0.0-alpha.19",
+    "@apollo/client": "^3.10.8",
     "@rescript/core": "^1.5.2",
     "@rescript/react": "^0.12.1",
+    "graphql": "^16.9.0",
+    "graphqurl": "^1.0.3",
     "lit-html": "^3.1.4",
     "npm-run-all2": "^6.2.2",
     "react": "^18.2.0",

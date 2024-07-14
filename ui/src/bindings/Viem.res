@@ -29,3 +29,32 @@ type contractInstance<'viewFns, 'writeFns> = {
 
 @module("./WalletClientUtils.mjs")
 external wrapWalletClient: (walletClient, ~account: address) => walletClient = "wrapWalletClient"
+
+//// Not used - kept in case
+let makeViemClientWithWindow: unit => walletClient = %raw(`
+  () => {
+    const {createWalletClient, defineChain, custom} = require("viem");
+    createWalletClient({
+      chain: defineChain({
+        id: 9090,
+        name: 'Inco Testnet',
+        nativeCurrency: {
+          decimals: 18,
+          name: 'Inco Token',
+          symbol: 'INCO',
+        },
+        rpcUrls: {
+          default: { http: ['https://testnet.inco.org'] },
+        },
+        blockExplorers: {
+          default: {
+            name: 'inco explorer',
+            url: 'https://explorer.testnet.inco.org',
+          },
+        },
+        testnet: true,
+      }),
+      transport: custom(window.ethereum)
+    })
+  }
+`)

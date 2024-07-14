@@ -24,17 +24,19 @@ switch ReactDOM.querySelector("#root") {
 | Some(domElement) =>
   ReactDOM.Client.createRoot(domElement)->ReactDOM.Client.Root.render(
     <React.StrictMode>
-      <Dynamic.DynamicContextProvider
-        settings={
-          environmentId: "cc8f4069-49e6-4958-87c6-c7ee274ddf20",
-          walletConnectors: [Dynamic.Ethereum.ethereumWalletConnectors],
-          overrides: {
-            evmNetworks: _ => [incoNetwork],
-          },
-        }>
-        <Dynamic.DynamicWidget />
-        <App />
-      </Dynamic.DynamicContextProvider>
+      <Apollo.Provider client={Apollo.client()}>
+        <Dynamic.DynamicContextProvider
+          settings={
+            environmentId: "cc8f4069-49e6-4958-87c6-c7ee274ddf20",
+            walletConnectors: [Dynamic.Ethereum.ethereumWalletConnectors],
+            overrides: {
+              evmNetworks: _ => [incoNetwork],
+            },
+          }>
+          <Dynamic.DynamicWidget />
+          <App />
+        </Dynamic.DynamicContextProvider>
+      </Apollo.Provider>
     </React.StrictMode>,
   )
 | None => ()
