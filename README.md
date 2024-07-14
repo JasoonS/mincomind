@@ -4,6 +4,8 @@ On chain cows and bulls tournament built on Inco network, leveraging fully homom
 
 > Commonly known as [Mastermind](<https://en.wikipedia.org/wiki/Mastermind_(board_game)>)
 
+- [Contract deployment](https://explorer.testnet.inco.org/address/0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5?tab=contract)
+
 ## Game play
 
 ### Basics
