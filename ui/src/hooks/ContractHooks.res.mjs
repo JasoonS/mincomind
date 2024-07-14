@@ -67,6 +67,15 @@ function useRequest3(request, deps) {
   return match[0];
 }
 
+function useRequest4(request, deps) {
+  var match = React.useState(function () {
+        return "Loading";
+      });
+  var partial_arg = requestInEffect(request, match[1]);
+  React.useEffect(Curry.__1(partial_arg), deps);
+  return match[0];
+}
+
 function useLatestGameId(user, mincomind) {
   return useRequest0(mincomind.read.getLatestGameId([user]));
 }
@@ -78,6 +87,19 @@ function useGame(user, gameId, mincomind) {
                 ]), [
               user,
               gameId,
+              mincomind
+            ]);
+}
+
+function useClue(user, gameId, attempt, mincomind) {
+  return useRequest4(mincomind.read.checkGuessResult([
+                  user,
+                  gameId,
+                  attempt
+                ]), [
+              user,
+              gameId,
+              attempt,
               mincomind
             ]);
 }
@@ -133,8 +155,10 @@ export {
   useRequest1 ,
   useRequest2 ,
   useRequest3 ,
+  useRequest4 ,
   useLatestGameId ,
   useGame ,
+  useClue ,
   useWalletClient ,
 }
 /* Viem Not a pure module */

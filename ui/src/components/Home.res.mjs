@@ -4,6 +4,7 @@ import * as ActionButtons from "./ActionButtons.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function Home(props) {
+  var user = props.user;
   var mincomind = props.mincomind;
   return JsxRuntime.jsxs("div", {
               children: [
@@ -16,7 +17,7 @@ function Home(props) {
                     }),
                 JsxRuntime.jsx(ActionButtons.EndGameActionButton.make, {
                       onAction: (function (param) {
-                          console.log("end game");
+                          mincomind.write.endGame([user]);
                         })
                     }),
                 JsxRuntime.jsx(ActionButtons.WithdrawFundsActionButton.make, {

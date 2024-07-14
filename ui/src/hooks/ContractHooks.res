@@ -37,12 +37,25 @@ let useRequest3 = (request, deps) => {
   state
 }
 
+let useRequest4 = (request, deps) => {
+  let (state, setState) = React.useState(_ => Loading)
+  React.useEffect4(requestInEffect(request, setState), deps)
+  state
+}
+
 let useLatestGameId = (~user: Viem.address, ~mincomind: Mincomind.instance) => {
   useRequest0(mincomind.read.getLatestGameId([user]))
 }
 
 let useGame = (~user, ~gameId, ~mincomind: Mincomind.instance) => {
   useRequest3(mincomind.read.getGame((user, gameId)), (user, gameId, mincomind))
+}
+
+let useClue = (~user, ~gameId, ~attempt, ~mincomind: Mincomind.instance) => {
+  useRequest4(
+    mincomind.read.checkGuessResult((user, gameId, attempt)),
+    (user, gameId, attempt, mincomind),
+  )
 }
 
 let useWalletClient = () => {

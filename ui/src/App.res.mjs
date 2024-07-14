@@ -22,15 +22,17 @@ function App(props) {
   } else {
     var walletClient = client._0;
     var mincomind = Mincomind.getContract(walletClient);
+    var user = walletClient.account.address;
     switch (match[0]) {
       case "Home" :
           tmp = JsxRuntime.jsx(Home.make, {
-                mincomind: mincomind
+                mincomind: mincomind,
+                user: user
               });
           break;
       case "Game" :
           tmp = JsxRuntime.jsx(Game.make, {
-                user: walletClient.account.address,
+                user: user,
                 mincomind: mincomind
               });
           break;

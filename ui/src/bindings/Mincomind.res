@@ -68,7 +68,7 @@ type options = {value: string}
 type writeFns = {
   newGame: options => promise<unit>,
   addGuess: array<array<color>> => promise<unit>,
-  endGame: (~user: Viem.address) => promise<unit>,
+  endGame: array<Viem.address> => promise<unit>,
   withdrawFunds: unit => promise<unit>,
 }
 

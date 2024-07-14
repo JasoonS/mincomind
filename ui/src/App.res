@@ -26,9 +26,10 @@ let make = () => {
     {switch client {
     | Data(walletClient) =>
       let mincomind = Mincomind.getContract(~walletClient)
+      let user = X.magic(walletClient)["account"]["address"]
       switch page {
-      | Home => <Home mincomind />
-      | Game => <Game user={X.magic(walletClient)["account"]["address"]} mincomind />
+      | Home => <Home user mincomind />
+      | Game => <Game user mincomind />
       | Leaderboard => <Table />
       }
     | Loading => "loading..."->React.string

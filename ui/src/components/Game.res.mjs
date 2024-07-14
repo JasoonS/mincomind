@@ -135,11 +135,36 @@ var SolutionRow = {
   make: Game$SolutionRow
 };
 
+function Game$CluePegs(props) {
+  var clue = ContractHooks.useClue(props.user, props.gameId, props.attempt, props.mincomind);
+  if (typeof clue !== "object") {
+    return "Loading clue...";
+  } else if (clue.TAG === "Err") {
+    return "Error loading clue...";
+  } else {
+    return toPegOptions(clue._0).map(function (optCowOrBull, i) {
+                return JsxRuntime.jsx("div", {
+                            className: "border border-blue-500 h-5 rounded-full " + getBgColor$1(optCowOrBull)
+                          }, i.toString());
+              });
+  }
+}
+
+var CluePegs = {
+  make: Game$CluePegs
+};
+
 function Game$GuessRow(props) {
+  var attempt = props.attempt;
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
-                      children: "Loading clue...",
+                      children: JsxRuntime.jsx(Game$CluePegs, {
+                            user: props.user,
+                            gameId: props.gameId,
+                            attempt: attempt,
+                            mincomind: props.mincomind
+                          }),
                       className: "w-14 grid grid-cols-2 gap-1 border p-1"
                     }),
                 JsxRuntime.jsxs("div", {
@@ -149,7 +174,7 @@ function Game$GuessRow(props) {
                               className: "text-white opacity-40 pr-4"
                             }),
                         JsxRuntime.jsx("div", {
-                              children: props.attempt.toString(),
+                              children: attempt.toString(),
                               className: "text-white opacity-40 pr-4"
                             }),
                         Mincomind.Guess.toArray(props.guess).map(function (c, i) {
@@ -378,11 +403,12 @@ var mockGuesses = Core__Array.filterMap([
 function Game$Game(props) {
   var mincomind = props.mincomind;
   var gameId = props.gameId;
+  var user = props.user;
   var match = React.useState(function () {
         return 0;
       });
   var selectedColor = match[0];
-  var game = ContractHooks.useGame(props.user, gameId, mincomind);
+  var game = ContractHooks.useGame(user, gameId, mincomind);
   if (typeof game !== "object") {
     return "Loading game " + gameId.toString() + "...";
   }
@@ -410,7 +436,10 @@ function Game$Game(props) {
                       var i = param[1];
                       return JsxRuntime.jsx(Game$GuessRow, {
                                   guess: param[0],
-                                  attempt: i
+                                  attempt: i,
+                                  user: user,
+                                  gameId: gameId,
+                                  mincomind: mincomind
                                 }, i.toString());
                     }),
                 JsxRuntime.jsx(Game$GuessCreator, {
@@ -454,6 +483,7 @@ export {
   getBgColor ,
   CowsAndBulls ,
   SolutionRow ,
+  CluePegs ,
   GuessRow ,
   GuessCreator ,
   ColorSelector ,

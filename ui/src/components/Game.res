@@ -91,28 +91,35 @@ module SolutionRow = {
   }
 }
 
+module CluePegs = {
+  @react.component
+  let make = (~user, ~gameId, ~attempt, ~mincomind) => {
+    switch ContractHooks.useClue(~user, ~gameId, ~attempt, ~mincomind) {
+    | Data(clue) =>
+      clue
+      ->CowsAndBulls.toPegOptions
+      ->Array.mapWithIndex((optCowOrBull, i) => {
+        <div
+          key={i->Int.toString}
+          className={`border border-blue-500 h-5 rounded-full ${CowsAndBulls.getBgColor(
+              optCowOrBull,
+            )}`}
+        />
+      })
+      ->React.array
+    | Loading => "Loading clue..."->React.string
+    | Err(_exn) => "Error loading clue..."->React.string
+    }
+  }
+}
+
 module GuessRow = {
   @react.component
-  let make = (~guess: Guess.t, ~attempt: int) => {
+  let make = (~guess: Guess.t, ~attempt: int, ~user, ~gameId, ~mincomind) => {
     let clue: ContractHooks.response<Clue.t> = ContractHooks.Loading
     <div className="bg-blue-300 flex items-center border w-full">
       <div className="w-14 grid grid-cols-2 gap-1 border p-1">
-        {switch clue {
-        | Data(clue) =>
-          clue
-          ->CowsAndBulls.toPegOptions
-          ->Array.mapWithIndex((optCowOrBull, i) => {
-            <div
-              key={i->Int.toString}
-              className={`border border-blue-500 h-5 rounded-full ${CowsAndBulls.getBgColor(
-                  optCowOrBull,
-                )}`}
-            />
-          })
-          ->React.array
-        | Loading => "Loading clue..."->React.string
-        | Err(_exn) => "Error loading clue..."->React.string
-        }}
+        <CluePegs user gameId attempt mincomind />
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
         <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
@@ -308,7 +315,7 @@ module Game = {
         ->Array.mapWithIndex((guess, index) => (Guess.fromArrayUnsafe(guess), index))
         ->Array.toReversed
         ->Array.map(((guess, i)) => {
-          <GuessRow key={i->Int.toString} guess attempt={i} />
+          <GuessRow key={i->Int.toString} guess attempt={i} user gameId mincomind />
         })
         ->React.array}
         <GuessCreator selectedColor mincomind />
