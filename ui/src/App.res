@@ -3,7 +3,8 @@ type view = Home | Game | Leaderboard
 @react.component
 let make = () => {
   let client = ContractHooks.useWalletClient()
-  let (page, setPage) = React.useState(() => Home)
+  let (page, setPage) = React.useState(() => Game)
+  // let (page, setPage) = React.useState(() => Home)
   <div className="p-6">
     <div className="flex items-center w-full text-md">
       <button

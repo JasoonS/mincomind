@@ -7,8 +7,13 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Result from "@rescript/core/src/Core__Result.res.mjs";
 import * as ContractHooks from "../hooks/ContractHooks.res.mjs";
+import * as GameDataJsx from "./gameData.jsx";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 import * as JsxRuntime from "react/jsx-runtime";
+
+function loadDataHack(prim0, prim1) {
+  return GameDataJsx.loadDataHackHack(prim0, prim1);
+}
 
 function getBgColor(colour) {
   switch (colour) {
@@ -429,6 +434,7 @@ function Game$1(props) {
 var make$1 = Game$1;
 
 export {
+  loadDataHack ,
   getBgColor ,
   CowsAndBulls ,
   SolutionRow ,

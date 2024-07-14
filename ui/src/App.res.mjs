@@ -11,7 +11,7 @@ import * as JsxRuntime from "react/jsx-runtime";
 function App(props) {
   var client = ContractHooks.useWalletClient();
   var match = React.useState(function () {
-        return "Home";
+        return "Game";
       });
   var setPage = match[1];
   var tmp;

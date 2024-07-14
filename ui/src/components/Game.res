@@ -1,5 +1,9 @@
 open Mincomind
-let getBgColor = (colour: color) =>
+
+@module("./gameData.jsx")
+external loadDataHack: (string, 'a => React.element) => React.element = "loadDataHackHack"
+
+let getBgColor = colour =>
   switch colour {
   | Red => "bg-red-400"
   | Orange => "bg-orange-400"
@@ -323,3 +327,11 @@ let make = (~user, ~mincomind: Mincomind.instance) => {
     }}
   </div>
 }
+
+/////// This is how we can get data with subscriptions on the graphql - implementation un-finished
+// @react.component
+// let make = (~walletClient: Viem.walletClient, ~publicClient) => {
+//   loadDataHack("0x7660788b35e06A4D6BF4985729ED1721dE351e7b", data =>
+//     <Child walletClient publicClient data />
+//   )
+// }
