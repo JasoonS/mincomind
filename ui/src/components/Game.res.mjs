@@ -148,6 +148,10 @@ function Game$GuessRow(props) {
                               children: " ",
                               className: "text-white opacity-40 pr-4"
                             }),
+                        JsxRuntime.jsx("div", {
+                              children: props.attempt.toString(),
+                              className: "text-white opacity-40 pr-4"
+                            }),
                         Mincomind.Guess.toArray(props.guess).map(function (c, i) {
                               return JsxRuntime.jsx("div", {
                                           className: "border h-10 w-10 drop-shadow-md rounded-full " + getBgColor(c)
@@ -166,6 +170,7 @@ var GuessRow = {
 };
 
 function Game$GuessCreator(props) {
+  var mincomind = props.mincomind;
   var selectedColor = props.selectedColor;
   var match = React.useState(function () {
         return Mincomind.Guess.make(undefined, undefined, undefined, undefined);
@@ -219,14 +224,18 @@ function Game$GuessCreator(props) {
                 };
         });
   };
-  var allSelected = currentGuess._0 !== undefined && currentGuess._1 !== undefined && currentGuess._2 !== undefined && currentGuess._3 !== undefined;
+  var allSelected = currentGuess._0 !== undefined && currentGuess._1 !== undefined && currentGuess._2 !== undefined ? currentGuess._3 !== undefined : false;
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
                       children: allSelected ? JsxRuntime.jsx("button", {
                               children: " OK ",
                               className: "text-center text-white text-lg mx-auto border py-0 px-2",
-                              disabled: !allSelected
+                              disabled: !allSelected,
+                              onClick: (function (param) {
+                                  var guess = Core__Array.keepSome(Mincomind.Guess.toArray(currentGuess));
+                                  mincomind.write.addGuess([guess]);
+                                })
                             }) : JsxRuntime.jsx("p", {
                               children: "Select colors",
                               className: "text-white text-center text-xxs leading-tight"
@@ -367,12 +376,13 @@ var mockGuesses = Core__Array.filterMap([
     ], resultToOption);
 
 function Game$Game(props) {
+  var mincomind = props.mincomind;
   var gameId = props.gameId;
   var match = React.useState(function () {
         return 0;
       });
   var selectedColor = match[0];
-  var game = ContractHooks.useGame(props.user, gameId, props.mincomind);
+  var game = ContractHooks.useGame(props.user, gameId, mincomind);
   if (typeof game !== "object") {
     return "Loading game " + gameId.toString() + "...";
   }
@@ -385,21 +395,27 @@ function Game$Game(props) {
       });
   return JsxRuntime.jsxs("div", {
               children: [
-                guesses.length,
                 JsxRuntime.jsx(Game$SolutionRow, {}),
                 Core__Array.make(8 - game$1.numGuesses | 0, 0).map(function (_0, index) {
                       return JsxRuntime.jsx(Game$EmptyRow, {
                                   index: index
                                 });
                     }),
-                guesses.map(function (guess, i) {
+                guesses.map(function (guess, index) {
+                          return [
+                                  Mincomind.Guess.fromArrayUnsafe(guess),
+                                  index
+                                ];
+                        }).toReversed().map(function (param) {
+                      var i = param[1];
                       return JsxRuntime.jsx(Game$GuessRow, {
-                                  guess: Mincomind.Guess.fromArrayUnsafe(guess),
+                                  guess: param[0],
                                   attempt: i
                                 }, i.toString());
                     }),
                 JsxRuntime.jsx(Game$GuessCreator, {
-                      selectedColor: selectedColor
+                      selectedColor: selectedColor,
+                      mincomind: mincomind
                     }),
                 JsxRuntime.jsx(Game$ColorSelector, {
                       selectedColor: selectedColor,

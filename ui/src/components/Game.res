@@ -116,6 +116,7 @@ module GuessRow = {
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
         <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
+        <div className="text-white opacity-40 pr-4"> {attempt->Int.toString->React.string} </div>
         {guess
         ->Guess.toArray
         ->Array.mapWithIndex((c, i) => {
@@ -132,7 +133,7 @@ module GuessRow = {
 
 module GuessCreator = {
   @react.component
-  let make = (~selectedColor: color) => {
+  let make = (~selectedColor: color, ~mincomind: Mincomind.instance) => {
     let (currentGuess, setCurrentGuess) = React.useState(_ => Guess.make(None, None, None, None))
 
     let getOptBgColor = optC =>
@@ -146,16 +147,19 @@ module GuessCreator = {
     let set2 = _ => setCurrentGuess(prev => {...prev, _2: Some(selectedColor)})
     let set3 = _ => setCurrentGuess(prev => {...prev, _3: Some(selectedColor)})
 
-    let allSelected =
-      currentGuess._0 != None &&
-      currentGuess._1 != None &&
-      currentGuess._2 != None &&
-      currentGuess._3 != None
+    let allSelected = switch currentGuess {
+    | {_0: Some(_0), _1: Some(_1), _2: Some(_2), _3: Some(_3)} => true
+    | _ => false
+    }
 
     <div className="bg-blue-400 flex items-center border w-full">
       <div className="w-16 grid  text-center">
         {allSelected
           ? <button
+              onClick={_ => {
+                let guess = currentGuess->Guess.toArray->Array.keepSome
+                mincomind.write.addGuess([guess])->ignore
+              }}
               disabled={!allSelected}
               className="text-center text-white text-lg mx-auto border py-0 px-2">
               {` OK `->React.string}
@@ -296,17 +300,18 @@ module Game = {
     | Data(game) =>
       let guesses = game.guesses->Array.filterWithIndex((_item, index) => index < game.numGuesses)
       <div>
-        {guesses->Array.length->React.int}
         <SolutionRow />
         {Array.make(~length=8 - game.numGuesses, 0)
         ->Array.mapWithIndex((_0, index) => <EmptyRow index />)
         ->React.array}
         {guesses
-        ->Array.mapWithIndex((guess, i) => {
-          <GuessRow key={i->Int.toString} guess={Guess.fromArrayUnsafe(guess)} attempt={i} />
+        ->Array.mapWithIndex((guess, index) => (Guess.fromArrayUnsafe(guess), index))
+        ->Array.toReversed
+        ->Array.map(((guess, i)) => {
+          <GuessRow key={i->Int.toString} guess attempt={i} />
         })
         ->React.array}
-        <GuessCreator selectedColor />
+        <GuessCreator selectedColor mincomind />
         <ColorSelector selectedColor setSelectedColor />
       </div>
     | Loading => `Loading game ${gameId->Int.toString}...`->React.string
