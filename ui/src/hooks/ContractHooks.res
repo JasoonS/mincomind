@@ -52,30 +52,25 @@ let useWalletClient = () => {
   let connector =
     dynamicContext.primaryWallet
     ->Js.Nullable.toOption
-    ->Option.flatMap(pw => pw.connector->Js.Nullable.toOption)
+    ->Option.flatMap(pw => pw.connector->Js.Nullable.toOption->Option.map(c => (c, pw.address)))
 
   React.useEffect1(() => {
-    switch (connector, state) {
-    | (Some(connector), Loading) =>
-      connector.getPublicClient()
-      ->Promise.thenResolve(publicClient => {
-        switch connector.getWalletClient() {
-        | exception exn =>
-          Console.error(exn)
-          setState(_ => Err(exn))
-        | walletClient => setState(_ => Data((walletClient, publicClient)))
+    let asyncFn = async () => {
+      switch (connector, state) {
+      | (Some((connector, account)), Loading) =>
+        switch connector.getWalletClient()->Viem.wrapWalletClient(~account) {
+        | exception exn => Console.log2("Failed to createWalletClientFromWallet", exn)
+        | walletClient =>
+          Console.log2("Wallet client here", walletClient)
+          setState(_ => Data(walletClient))
         }
-      })
-      ->Promise.catch(exn => {
-        Console.error(exn)
-        setState(_ => Err(exn))
-        Promise.resolve()
-      })
-      ->ignore
-    | _ => ()
+      | _ => ()
+      }
     }
+    asyncFn()->ignore
+
     None
-  }, [connector->Option.map(c => X.magic(c)["isInitialized"])])
+  }, [dynamicContext.primaryWallet])
 
   state
 }

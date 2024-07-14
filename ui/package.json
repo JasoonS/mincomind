@@ -14,10 +14,11 @@
     "devu": "run-p --continue-on-error res:dev vite:dev"
   },
   "dependencies": {
-    "@dynamic-labs/ethereum": "^2.3.1",
-    "@dynamic-labs/sdk-react-core": "^2.3.1",
     "@glennsl/rescript-fetch": "^0.2.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@dynamic-labs/ethereum": "3.0.0-alpha.19",
+    "@dynamic-labs/sdk-react-core": "3.0.0-alpha.19",
+    "@dynamic-labs/viem-utils": "3.0.0-alpha.19",
     "@rescript/core": "^1.5.2",
     "@rescript/react": "^0.12.1",
     "lit-html": "^3.1.4",

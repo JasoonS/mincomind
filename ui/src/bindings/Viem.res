@@ -25,5 +25,7 @@ type contractInstance<'viewFns, 'writeFns> = {
 }
 
 @module("viem") external getContract: contractArgs => contractInstance<'a, 'b> = "getContract"
-
 @module("viem") external parseAbiUnsafe: 'a => abi = "parseAbi"
+
+@module("./WalletClientUtils.mjs")
+external wrapWalletClient: (walletClient, ~account: address) => walletClient = "wrapWalletClient"

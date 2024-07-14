@@ -2,6 +2,7 @@
 
 import * as Viem from "viem";
 import * as Caml_js_exceptions from "rescript/lib/es6/caml_js_exceptions.js";
+import * as WalletClientUtilsMjs from "./WalletClientUtils.mjs";
 
 function getAddress(s) {
   var addr;
@@ -21,7 +22,12 @@ function getAddress(s) {
         };
 }
 
+function wrapWalletClient(prim0, prim1) {
+  return WalletClientUtilsMjs.wrapWalletClient(prim0, prim1);
+}
+
 export {
   getAddress ,
+  wrapWalletClient ,
 }
 /* viem Not a pure module */

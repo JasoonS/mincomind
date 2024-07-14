@@ -19,17 +19,11 @@ function App(props) {
         tmp = JsxRuntime.jsx(Home.make, {});
         break;
     case "Game" :
-        if (typeof client !== "object") {
-          tmp = "loading...";
-        } else if (client.TAG === "Err") {
-          tmp = "Error getting client check console...";
-        } else {
-          var match$1 = client._0;
-          tmp = JsxRuntime.jsx(Game.make, {
-                walletClient: match$1[0],
-                publicClient: match$1[1]
-              });
-        }
+        tmp = typeof client !== "object" ? "loading..." : (
+            client.TAG === "Err" ? "Error getting client check console..." : JsxRuntime.jsx(Game.make, {
+                    walletClient: client._0
+                  })
+          );
         break;
     case "Leaderboard" :
         tmp = JsxRuntime.jsx(Table.make, {});

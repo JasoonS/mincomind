@@ -33,12 +33,12 @@ var Guess = {
 
 var Clue = {};
 
-function getContract(walletClient, publicClient) {
+function getContract(walletClient) {
+  console.log("getContract called", walletClient);
   return Viem.getContract({
               address: address,
               abi: abi,
               client: {
-                public: Caml_option.some(publicClient),
                 wallet: Caml_option.some(walletClient)
               }
             });

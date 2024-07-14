@@ -55,6 +55,8 @@ type viewFns = {
   getGame: ((Viem.address, gameId)) => promise<game>,
 }
 
+type options = {value: string}
+
 type writeFns = {
   newGame: unit => promise<unit>,
   checkGuessResult: (~user: Viem.address, ~gameId: gameId, ~guessIndex: int) => promise<Clue.t>,
@@ -65,15 +67,16 @@ type writeFns = {
 
 type instance = Viem.contractInstance<viewFns, writeFns>
 
-let getContract = (~walletClient, ~publicClient): instance =>
+let getContract = (~walletClient): instance => {
+  Console.log2("getContract called", walletClient)
   Viem.getContract({
     address,
     abi,
     client: {
       wallet: walletClient,
-      public: publicClient,
     },
   })
+}
 
 // @module("./testclient.mjs") external testclient: Viem.publicClient = "testclient"
 //

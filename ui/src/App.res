@@ -26,7 +26,7 @@ let make = () => {
     | Home => <Home />
     | Game =>
       switch client {
-      | Data((walletClient, publicClient)) => <Game walletClient publicClient />
+      | Data(walletClient) => <Game walletClient />
       | Loading => "loading..."->React.string
       | Err(_) => "Error getting client check console..."->React.string
       }

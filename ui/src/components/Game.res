@@ -281,16 +281,29 @@ let mockGuesses: array<Guess.guess> = [
 //   ]->Array.filterMap(resultToOption)
 
 @react.component
-let make = (~walletClient: Viem.walletClient, ~publicClient) => {
-  let mincomind = Mincomind.getContract(~walletClient, ~publicClient)
-  Console.log2("mincomind", mincomind)
+let make = (~walletClient: Viem.walletClient) => {
+  let mincomind = Mincomind.getContract(~walletClient)
 
-  let latestGameId = ContractHooks.useLatestGameId(
-    ~mincomind,
-    ~user="0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
-  )
-  //
-  Console.log2("latestGameId", latestGameId)
+  React.useEffect0(() => {
+    setTimeout(() => {
+      mincomind.write.newGame()
+      ->Promise.catch(
+        exn => {
+          Console.log2("tx exn", exn)
+          Promise.resolve()
+        },
+      )
+      ->ignore
+    }, 5000)->ignore
+    None
+  })
+  // // Console.log2("mincomind", mincomind)
+  // let latestGameId = ContractHooks.useLatestGameId(
+  //   ~mincomind,
+  //   ~user="0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
+  // )
+  // //
+  // Console.log2("latestGameId", latestGameId)
 
   let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
 

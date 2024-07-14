@@ -141,6 +141,16 @@ module DynamicContextProvider = {
     "DynamicContextProvider"
 }
 
+type connector = {
+  getPublicClient: unit => promise<Viem.publicClient>,
+  getWalletClient: unit => Viem.walletClient,
+  getSigner: unit => promise<Viem.walletClient>,
+}
+type primaryWallet = {connector: Js.Nullable.t<connector>, address: Viem.address}
+@module("@dynamic-labs/viem-utils")
+external createWalletClientFromWallet: primaryWallet => promise<Viem.walletClient> =
+  "createWalletClientFromWallet"
+
 module DynamicWidget = {
   type variant = | @as("modal") Modal | @as("dropdown") Dropdown
   @module("@dynamic-labs/sdk-react-core") @react.component
@@ -153,14 +163,6 @@ module DynamicWidget = {
 }
 
 module Hooks = {
-  type publicClient
-  type walletClient
-  type connector = {
-    getPublicClient: unit => promise<Viem.publicClient>,
-    getWalletClient: unit => Viem.walletClient,
-
-  }
-  type primaryWallet = {connector: Js.Nullable.t<connector>}
   type network = {networkChainId?: int, networkName?: string}
   type walletConnector = {
     supportsNetworkSwitching: unit => bool,
