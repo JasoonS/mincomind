@@ -17,6 +17,15 @@ function make(_0, _1, _2, _3) {
         };
 }
 
+function fromArrayUnsafe(tAsArray) {
+  return {
+          _0: tAsArray[0],
+          _1: tAsArray[1],
+          _2: tAsArray[2],
+          _3: tAsArray[3]
+        };
+}
+
 function toArray(param) {
   return [
           param._0,
@@ -28,21 +37,21 @@ function toArray(param) {
 
 var Guess = {
   make: make,
+  fromArrayUnsafe: fromArrayUnsafe,
   toArray: toArray
 };
 
 var Clue = {};
 
 function getContract(walletClient) {
-  var contract = Viem.getContract({
-        address: address,
-        abi: abi,
-        client: {
-          wallet: Caml_option.some(walletClient)
-        }
-      });
-  console.log("contract created", contract);
-  return contract;
+  return Viem.getContract({
+              address: address,
+              abi: abi,
+              client: {
+                public: Caml_option.some(walletClient),
+                wallet: Caml_option.some(walletClient)
+              }
+            });
 }
 
 export {

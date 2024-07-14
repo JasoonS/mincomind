@@ -9,7 +9,7 @@ let address = "0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5"->Viem.getAddressUnsaf
 
 type gameId = int
 type secret
-type colour =
+type color =
   | @as(0) Red | @as(1) Orange | @as(2) Yellow | @as(3) Green | @as(4) Blue | @as(5) Purple
 
 module Guess = {
@@ -27,16 +27,23 @@ module Guess = {
     _3,
   }
 
+  type t = tGeneric<color>
+  type tAsArray = array<color>
+  let fromArrayUnsafe = (tAsArray): t => {
+    _0: tAsArray[0]->Option.getUnsafe,
+    _1: tAsArray[1]->Option.getUnsafe,
+    _3: tAsArray[3]->Option.getUnsafe,
+    _2: tAsArray[2]->Option.getUnsafe,
+  }
   let toArray: tGeneric<'a> => array<'a> = ({_0, _1, _2, _3}) => [_0, _1, _2, _3]
 
-  type t = tGeneric<colour>
   // type guess = {guess: t<colour>, cowsAndBulls: CowsAndBulls.t}
   // type guessInput = t<option<colour>>
 }
 
 type game = {
   secret: secret,
-  guesses: array<Guess.t>,
+  guesses: array<Guess.tAsArray>,
   lastGuessTimestamp: int,
   numGuesses: int,
   isComplete: bool,
@@ -60,23 +67,24 @@ type options = {value: string}
 
 type writeFns = {
   newGame: options => promise<unit>,
-  addGuess: array<array<colour>> => promise<unit>,
+  addGuess: array<array<color>> => promise<unit>,
   endGame: (~user: Viem.address) => promise<unit>,
   withdrawFunds: unit => promise<unit>,
 }
 
 type instance = Viem.contractInstance<viewFns, writeFns>
 
-let getContract = (~walletClient): instance => {
+let getContract = (~walletClient: Viem.walletClient): instance => {
   let contract = Viem.getContract({
     address,
     abi,
     client: {
       wallet: walletClient,
+      public: walletClient->X.magic,
     },
   })
 
-  Console.log2("contract created", contract)
+  // Console.log2("contract created", contract)
   contract
 }
 

@@ -1,7 +1,5 @@
-type colour =
-  | @as(0) Red | @as(1) Orange | @as(2) Yellow | @as(3) Green | @as(4) Blue | @as(5) Purple
-
-let getBgColor = colour =>
+open Mincomind
+let getBgColor = (colour: color) =>
   switch colour {
   | Red => "bg-red-400"
   | Orange => "bg-orange-400"
@@ -12,10 +10,8 @@ let getBgColor = colour =>
   }
 
 module CowsAndBulls = {
-  type t = {
-    bulls: int,
-    cows: int,
-  }
+  open Mincomind.Clue
+  type t = Mincomind.Clue.t
   exception ExceededLimitOf4
   let make = (~bulls, ~cows) => {
     if cows + bulls <= 4 {
@@ -41,26 +37,27 @@ module CowsAndBulls = {
     | None => "bg-black opacity-25"
     }
 }
-module Guess = {
-  type t<'a> = {
-    @as(0) _0: 'a,
-    @as(1) _1: 'a,
-    @as(2) _2: 'a,
-    @as(3) _3: 'a,
-  }
+// module Guess = {
+//   open     MincoMind.Guess
+//   type t<'a> = {
+//     @as(0) _0: 'a,
+//     @as(1) _1: 'a,
+//     @as(2) _2: 'a,
+//     @as(3) _3: 'a,
+//   }
+//
+//   let make = (_0, _1, _2, _3) => {
+//     _0,
+//     _1,
+//     _2,
+//     _3,
+//   }
+//
+//   let toArray: t<'a> => array<'a> = ({_0, _1, _2, _3}) => [_0, _1, _2, _3]
+// }
 
-  let make = (_0, _1, _2, _3) => {
-    _0,
-    _1,
-    _2,
-    _3,
-  }
-
-  let toArray: t<'a> => array<'a> = ({_0, _1, _2, _3}) => [_0, _1, _2, _3]
-  type guess = {guess: t<colour>, cowsAndBulls: CowsAndBulls.t}
-  type guessInput = t<option<colour>>
-}
-
+type guess = {guess: Guess.t, cowsAndBulls: CowsAndBulls.t}
+type guessInput = Guess.tGeneric<option<color>>
 module SolutionRow = {
   @react.component
   let make = () => {
@@ -92,21 +89,26 @@ module SolutionRow = {
 
 module GuessRow = {
   @react.component
-  let make = (~guess: Guess.guess, ~attempt: int) => {
-    let {guess, cowsAndBulls} = guess
+  let make = (~guess: Guess.t, ~attempt: int) => {
+    let clue: ContractHooks.response<Clue.t> = ContractHooks.Loading
     <div className="bg-blue-300 flex items-center border w-full">
       <div className="w-14 grid grid-cols-2 gap-1 border p-1">
-        {cowsAndBulls
-        ->CowsAndBulls.toPegOptions
-        ->Array.mapWithIndex((optCowOrBull, i) => {
-          <div
-            key={i->Int.toString}
-            className={`border border-blue-500 h-5 rounded-full ${CowsAndBulls.getBgColor(
-                optCowOrBull,
-              )}`}
-          />
-        })
-        ->React.array}
+        {switch clue {
+        | Data(clue) =>
+          clue
+          ->CowsAndBulls.toPegOptions
+          ->Array.mapWithIndex((optCowOrBull, i) => {
+            <div
+              key={i->Int.toString}
+              className={`border border-blue-500 h-5 rounded-full ${CowsAndBulls.getBgColor(
+                  optCowOrBull,
+                )}`}
+            />
+          })
+          ->React.array
+        | Loading => "Loading clue..."->React.string
+        | Err(_exn) => "Error loading clue..."->React.string
+        }}
       </div>
       <div className="flex gap-1 mx-auto items-center p-2">
         <div className="text-white opacity-40 pr-4"> {" "->React.string} </div>
@@ -126,7 +128,7 @@ module GuessRow = {
 
 module GuessCreator = {
   @react.component
-  let make = (~selectedColor: colour) => {
+  let make = (~selectedColor: color) => {
     let (currentGuess, setCurrentGuess) = React.useState(_ => Guess.make(None, None, None, None))
 
     let getOptBgColor = optC =>
@@ -252,8 +254,8 @@ module EmptyRow = {
   }
 }
 
-let makeGuess = (~guess, ~cows, ~bulls): result<Guess.guess, _> => {
-  CowsAndBulls.make(~cows, ~bulls)->Result.map((cowsAndBulls): Guess.guess => {
+let makeGuess = (~guess, ~cows, ~bulls): result<guess, _> => {
+  CowsAndBulls.make(~cows, ~bulls)->Result.map((cowsAndBulls): guess => {
     guess,
     cowsAndBulls,
   })
@@ -265,7 +267,7 @@ let resultToOption = result =>
   | Error(_) => None
   }
 
-let mockGuesses: array<Guess.guess> = [
+let mockGuesses: array<guess> = [
   makeGuess(~guess=Guess.make(Blue, Red, Orange, Yellow), ~cows=1, ~bulls=1),
   makeGuess(~guess=Guess.make(Purple, Red, Yellow, Green), ~cows=2, ~bulls=0),
   makeGuess(~guess=Guess.make(Blue, Blue, Orange, Orange), ~cows=0, ~bulls=3),
@@ -283,12 +285,26 @@ let mockGuesses: array<Guess.guess> = [
 module Game = {
   @react.component
   let make = (~user, ~gameId, ~mincomind) => {
+    let (selectedColor, setSelectedColor) = React.useState(_ => Red)
     let game = ContractHooks.useGame(~user, ~gameId, ~mincomind)
 
     switch game {
     | Data(game) =>
-      Console.log2("game", game)
-      "Game"->React.string
+      let guesses = game.guesses->Array.filterWithIndex((_item, index) => index < game.numGuesses)
+      <div>
+        {guesses->Array.length->React.int}
+        <SolutionRow />
+        {Array.make(~length=8 - game.numGuesses, 0)
+        ->Array.mapWithIndex((_0, index) => <EmptyRow index />)
+        ->React.array}
+        {guesses
+        ->Array.mapWithIndex((guess, i) => {
+          <GuessRow key={i->Int.toString} guess={Guess.fromArrayUnsafe(guess)} attempt={i} />
+        })
+        ->React.array}
+        <GuessCreator selectedColor />
+        <ColorSelector selectedColor setSelectedColor />
+      </div>
     | Loading => `Loading game ${gameId->Int.toString}...`->React.string
     | Err(_exn) => "Error loading game..."->React.string
     }
@@ -299,30 +315,11 @@ module Game = {
 let make = (~user, ~mincomind: Mincomind.instance) => {
   let latestGameId = ContractHooks.useLatestGameId(~mincomind, ~user) //="0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
 
-  let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
-
-  let grid = [0, 1, 2, 3, 4, 5, 6, 7] // hacky but working to show the full grid
-
-  let (selectedColor, setSelectedColor) = React.useState(_ => Red)
   <div className="flex flex-col items-center max-w-md mx-auto rounded px-8">
     {switch latestGameId {
     | Data(latestGameId) => <Game user mincomind gameId=latestGameId />
     | Loading => "Checking latest game..."->React.string
     | Err(_exn) => "Error checking latest game..."->React.string
     }}
-    <div>
-      <SolutionRow />
-      {grid
-      ->Js.Array2.slice(~start=0, ~end_=8 - guesses->Array.length)
-      ->Array.mapWithIndex((x, index) => <EmptyRow index />)
-      ->React.array}
-      {guesses
-      ->Array.mapWithIndex((guess, i) => {
-        <GuessRow key={i->Int.toString} guess attempt={i} />
-      })
-      ->React.array}
-      <GuessCreator selectedColor />
-      <ColorSelector selectedColor setSelectedColor />
-    </div>
   </div>
 }
