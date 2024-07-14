@@ -4,6 +4,7 @@ import * as Game from "./components/Game.res.mjs";
 import * as Home from "./components/Home.res.mjs";
 import * as Table from "./components/Table.res.mjs";
 import * as React from "react";
+import * as Mincomind from "./bindings/Mincomind.res.mjs";
 import * as ContractHooks from "./hooks/ContractHooks.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -14,21 +15,30 @@ function App(props) {
       });
   var setPage = match[1];
   var tmp;
-  switch (match[0]) {
-    case "Home" :
-        tmp = JsxRuntime.jsx(Home.make, {});
-        break;
-    case "Game" :
-        tmp = typeof client !== "object" ? "loading..." : (
-            client.TAG === "Err" ? "Error getting client check console..." : JsxRuntime.jsx(Game.make, {
-                    walletClient: client._0
-                  })
-          );
-        break;
-    case "Leaderboard" :
-        tmp = JsxRuntime.jsx(Table.make, {});
-        break;
-    
+  if (typeof client !== "object") {
+    tmp = "loading...";
+  } else if (client.TAG === "Err") {
+    tmp = "Error getting client check console...";
+  } else {
+    var walletClient = client._0;
+    var mincomind = Mincomind.getContract(walletClient);
+    switch (match[0]) {
+      case "Home" :
+          tmp = JsxRuntime.jsx(Home.make, {
+                mincomind: mincomind
+              });
+          break;
+      case "Game" :
+          tmp = JsxRuntime.jsx(Game.make, {
+                user: walletClient.account.address,
+                mincomind: mincomind
+              });
+          break;
+      case "Leaderboard" :
+          tmp = JsxRuntime.jsx(Table.make, {});
+          break;
+      
+    }
   }
   return JsxRuntime.jsxs("div", {
               children: [

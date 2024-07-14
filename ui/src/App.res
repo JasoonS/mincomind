@@ -22,15 +22,16 @@ let make = () => {
         {"Leaderboard"->React.string}
       </button>
     </div>
-    {switch page {
-    | Home => <Home />
-    | Game =>
-      switch client {
-      | Data(walletClient) => <Game walletClient />
-      | Loading => "loading..."->React.string
-      | Err(_) => "Error getting client check console..."->React.string
+    {switch client {
+    | Data(walletClient) =>
+      let mincomind = Mincomind.getContract(~walletClient)
+      switch page {
+      | Home => <Home mincomind />
+      | Game => <Game user={X.magic(walletClient)["account"]["address"]} mincomind />
+      | Leaderboard => <Table />
       }
-    | Leaderboard => <Table />
+    | Loading => "loading..."->React.string
+    | Err(_) => "Error getting client check console..."->React.string
     }}
   </div>
 }

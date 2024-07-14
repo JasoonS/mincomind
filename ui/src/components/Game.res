@@ -280,30 +280,24 @@ let mockGuesses: array<Guess.guess> = [
 //     makeGuess(~guess=Guess.make(Yellow, Yellow, Orange, Orange), ~cows=2, ~bulls=2),
 //   ]->Array.filterMap(resultToOption)
 
-@react.component
-let make = (~walletClient: Viem.walletClient) => {
-  let mincomind = Mincomind.getContract(~walletClient)
+module Game = {
+  @react.component
+  let make = (~user, ~gameId, ~mincomind) => {
+    let game = ContractHooks.useGame(~user, ~gameId, ~mincomind)
 
-  React.useEffect0(() => {
-    setTimeout(() => {
-      mincomind.write.newGame()
-      ->Promise.catch(
-        exn => {
-          Console.log2("tx exn", exn)
-          Promise.resolve()
-        },
-      )
-      ->ignore
-    }, 5000)->ignore
-    None
-  })
-  // // Console.log2("mincomind", mincomind)
-  // let latestGameId = ContractHooks.useLatestGameId(
-  //   ~mincomind,
-  //   ~user="0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
-  // )
-  // //
-  // Console.log2("latestGameId", latestGameId)
+    switch game {
+    | Data(game) =>
+      Console.log2("game", game)
+      "Game"->React.string
+    | Loading => `Loading game ${gameId->Int.toString}...`->React.string
+    | Err(_exn) => "Error loading game..."->React.string
+    }
+  }
+}
+
+@react.component
+let make = (~user, ~mincomind: Mincomind.instance) => {
+  let latestGameId = ContractHooks.useLatestGameId(~mincomind, ~user) //="0x7660788b35e06A4D6BF4985729ED1721dE351e7b"->Viem.getAddressUnsafe,
 
   let (guesses, _setGuesses) = React.useState(_ => mockGuesses)
 
@@ -311,6 +305,11 @@ let make = (~walletClient: Viem.walletClient) => {
 
   let (selectedColor, setSelectedColor) = React.useState(_ => Red)
   <div className="flex flex-col items-center max-w-md mx-auto rounded px-8">
+    {switch latestGameId {
+    | Data(latestGameId) => <Game user mincomind gameId=latestGameId />
+    | Loading => "Checking latest game..."->React.string
+    | Err(_exn) => "Error checking latest game..."->React.string
+    }}
     <div>
       <SolutionRow />
       {grid

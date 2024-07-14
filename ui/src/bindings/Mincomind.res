@@ -53,14 +53,14 @@ module Clue = {
 type viewFns = {
   getLatestGameId: array<Viem.address> => promise<gameId>,
   getGame: ((Viem.address, gameId)) => promise<game>,
+  checkGuessResult: ((Viem.address, gameId, int)) => promise<Clue.t>,
 }
 
 type options = {value: string}
 
 type writeFns = {
-  newGame: unit => promise<unit>,
-  checkGuessResult: (~user: Viem.address, ~gameId: gameId, ~guessIndex: int) => promise<Clue.t>,
-  addGuess: (~guessAsArray: array<colour>) => promise<unit>,
+  newGame: options => promise<unit>,
+  addGuess: array<array<colour>> => promise<unit>,
   endGame: (~user: Viem.address) => promise<unit>,
   withdrawFunds: unit => promise<unit>,
 }
@@ -68,14 +68,16 @@ type writeFns = {
 type instance = Viem.contractInstance<viewFns, writeFns>
 
 let getContract = (~walletClient): instance => {
-  Console.log2("getContract called", walletClient)
-  Viem.getContract({
+  let contract = Viem.getContract({
     address,
     abi,
     client: {
       wallet: walletClient,
     },
   })
+
+  Console.log2("contract created", contract)
+  contract
 }
 
 // @module("./testclient.mjs") external testclient: Viem.publicClient = "testclient"

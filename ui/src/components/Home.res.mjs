@@ -4,11 +4,14 @@ import * as ActionButtons from "./ActionButtons.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function Home(props) {
+  var mincomind = props.mincomind;
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx(ActionButtons.NewGameActionButton.make, {
                       onAction: (function (param) {
-                          console.log("new game");
+                          mincomind.write.newGame({
+                                value: "1000000000000000"
+                              });
                         })
                     }),
                 JsxRuntime.jsx(ActionButtons.EndGameActionButton.make, {
