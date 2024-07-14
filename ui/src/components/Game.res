@@ -257,7 +257,7 @@ module EmptyRow = {
           {(8 - index)->Int.toString->React.string}
         </div>
         {Array.make(~length=4, Red)
-        ->Array.mapWithIndex((c, i) => {
+        ->Array.mapWithIndex((_c, i) => {
           <div
             key={i->Int.toString}
             className={`border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25`}
@@ -299,7 +299,7 @@ let mockGuesses: array<guess> = [
 
 module Game = {
   @react.component
-  let make = (~user, ~gameId, ~mincomind) => {
+  let make = (~user, ~gameId, ~mincomind: Mincomind.instance) => {
     let (selectedColor, setSelectedColor) = React.useState(_ => Red)
     let game = ContractHooks.useGame(~user, ~gameId, ~mincomind)
 

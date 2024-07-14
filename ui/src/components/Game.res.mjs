@@ -361,7 +361,7 @@ function Game$EmptyRow(props) {
                               children: (8 - props.index | 0).toString(),
                               className: "text-white opacity-40 pr-4"
                             }),
-                        Core__Array.make(4, 0).map(function (c, i) {
+                        Core__Array.make(4, 0).map(function (_c, i) {
                               return JsxRuntime.jsx("div", {
                                           className: "border h-10 w-10 drop-shadow-md rounded-full bg-black opacity-25"
                                         }, i.toString());

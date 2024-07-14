@@ -61,6 +61,9 @@ type viewFns = {
   getLatestGameId: array<Viem.address> => promise<gameId>,
   getGame: ((Viem.address, gameId)) => promise<game>,
   checkGuessResult: ((Viem.address, gameId, int)) => promise<Clue.t>,
+  totalPoints: unit => promise<int>,
+  points: Viem.address => promise<int>,
+  lockedFunds: unit => promise<bigint>,
 }
 
 type options = {value: string}

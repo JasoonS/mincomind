@@ -80,6 +80,14 @@ function useLatestGameId(user, mincomind) {
   return useRequest0(mincomind.read.getLatestGameId([user]));
 }
 
+function useTotalPoints(mincomind) {
+  return useRequest0(mincomind.read.totalPoints());
+}
+
+function useLockedFunds(mincomind) {
+  return useRequest0(mincomind.read.lockedFunds());
+}
+
 function useGame(user, gameId, mincomind) {
   return useRequest3(mincomind.read.getGame([
                   user,
@@ -157,6 +165,8 @@ export {
   useRequest3 ,
   useRequest4 ,
   useLatestGameId ,
+  useTotalPoints ,
+  useLockedFunds ,
   useGame ,
   useClue ,
   useWalletClient ,

@@ -3,10 +3,20 @@
 import * as React from "react";
 import * as Queries from "../queries/Queries.res.mjs";
 import * as Pagination from "./Pagination.res.mjs";
+import * as ContractHooks from "../hooks/ContractHooks.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function Table$Row(props) {
+  var lockedFunds = props.lockedFunds;
+  var totalPoints = props.totalPoints;
+  var availableFunds = props.availableFunds;
   var player = props.player;
+  if (typeof availableFunds === "object" && availableFunds.TAG !== "Err" && typeof totalPoints === "object" && totalPoints.TAG !== "Err" && typeof lockedFunds === "object" && lockedFunds.TAG !== "Err") {
+    var totalAvailable = availableFunds._0 - lockedFunds._0;
+    var numerator = BigInt(player.points) * totalAvailable;
+    var result = numerator / (BigInt(totalPoints._0 + 1 | 0) * 100000000000000n);
+    result.toString();
+  }
   return JsxRuntime.jsxs("tr", {
               children: [
                 JsxRuntime.jsx("td", {
@@ -33,10 +43,6 @@ function Table$Row(props) {
                 JsxRuntime.jsx("td", {
                       children: player.points,
                       className: "py-1 px-3 text-left"
-                    }),
-                JsxRuntime.jsx("td", {
-                      children: "$",
-                      className: "py-1 px-3 text-left"
                     })
               ],
               className: props.rowStyle
@@ -48,8 +54,9 @@ var Row = {
 };
 
 function Table$TableInner(props) {
-  var players = props.players;
-  console.log("players", players);
+  var mincomind = props.mincomind;
+  var toralPoints = ContractHooks.useTotalPoints(mincomind);
+  var lockedFunds = ContractHooks.useLockedFunds(mincomind);
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("table", {
                     children: [
@@ -67,20 +74,23 @@ function Table$TableInner(props) {
                                     JsxRuntime.jsx("th", {
                                           children: "Points",
                                           className: "py-3 px-6 text-left"
-                                        }),
-                                    JsxRuntime.jsx("th", {
-                                          children: "Inco earned",
-                                          className: "py-3 px-6 text-left"
                                         })
                                   ]
                                 }),
                             className: "m-10 text-xs bg-black"
                           }),
                       JsxRuntime.jsx("tbody", {
-                            children: players.map(function (player, index) {
+                            children: props.players.map(function (player, index) {
                                   return JsxRuntime.jsx(Table$Row, {
                                               player: player,
-                                              rowStyle: index % 2 === 0 ? "bg-white bg-opacity-10" : ""
+                                              rowStyle: index % 2 === 0 ? "bg-white bg-opacity-10" : "",
+                                              mincomind: mincomind,
+                                              availableFunds: {
+                                                TAG: "Data",
+                                                _0: 100000000000000000n
+                                              },
+                                              totalPoints: toralPoints,
+                                              lockedFunds: lockedFunds
                                             }, player.id);
                                 })
                           })
@@ -106,7 +116,9 @@ function Table$TableOuter(props) {
                 JsxRuntime.jsx(Table$TableInner, {
                       players: players,
                       page: page,
-                      pageSize: 10
+                      pageSize: 10,
+                      mincomind: props.mincomind,
+                      client: props.client
                     }),
                 JsxRuntime.jsx(Pagination.make, {
                       activePage: page + 1 | 0,
@@ -168,7 +180,9 @@ function Table(props) {
           children: "loading..."
         }) : (
       playersReq.TAG === "Data" ? JsxRuntime.jsx(Table$TableOuter, {
-              players: playersReq._0
+              players: playersReq._0,
+              mincomind: props.mincomind,
+              client: props.client
             }) : JsxRuntime.jsx("div", {
               children: "Error"
             })

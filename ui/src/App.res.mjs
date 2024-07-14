@@ -11,7 +11,7 @@ import * as JsxRuntime from "react/jsx-runtime";
 function App(props) {
   var client = ContractHooks.useWalletClient();
   var match = React.useState(function () {
-        return "Game";
+        return "Home";
       });
   var setPage = match[1];
   var tmp;
@@ -37,7 +37,10 @@ function App(props) {
               });
           break;
       case "Leaderboard" :
-          tmp = JsxRuntime.jsx(Table.make, {});
+          tmp = JsxRuntime.jsx(Table.make, {
+                mincomind: mincomind,
+                client: walletClient
+              });
           break;
       
     }

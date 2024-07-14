@@ -47,6 +47,14 @@ let useLatestGameId = (~user: Viem.address, ~mincomind: Mincomind.instance) => {
   useRequest0(mincomind.read.getLatestGameId([user]))
 }
 
+let useTotalPoints = (~mincomind: Mincomind.instance) => {
+  useRequest0(mincomind.read.totalPoints())
+}
+
+let useLockedFunds = (~mincomind: Mincomind.instance) => {
+  useRequest0(mincomind.read.lockedFunds())
+}
+
 let useGame = (~user, ~gameId, ~mincomind: Mincomind.instance) => {
   useRequest3(mincomind.read.getGame((user, gameId)), (user, gameId, mincomind))
 }

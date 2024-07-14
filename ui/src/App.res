@@ -3,8 +3,7 @@ type view = Home | Game | Leaderboard
 @react.component
 let make = () => {
   let client = ContractHooks.useWalletClient()
-  let (page, setPage) = React.useState(() => Game)
-  // let (page, setPage) = React.useState(() => Home)
+  let (page, setPage) = React.useState(() => Home)
   <div className="p-6">
     <div className="flex items-center w-full text-md">
       <button
@@ -30,7 +29,7 @@ let make = () => {
       switch page {
       | Home => <Home user mincomind />
       | Game => <Game user mincomind />
-      | Leaderboard => <Table />
+      | Leaderboard => <Table mincomind client={walletClient} />
       }
     | Loading => "loading..."->React.string
     | Err(_) => "Error getting client check console..."->React.string
