@@ -115,6 +115,19 @@ contract MincomindTester is Mincomind, FakeFHE {
         emit NewGame(msg.sender, latestGame);
     }
 
+    function updateValuesForPlayer(address user, uint8 first, uint8 second, uint8 third, uint8 fourth) public {
+        Game storage usersGame = games[user][latestGames[user]];
+
+        require(usersGame.numGuesses == 0, "Game already started");
+        require(usersGame.timeStarted >= block.timestamp - 10 minutes, "past expiry time");
+        require(!usersGame.isComplete, "game completed");
+
+        usersGame.secret[0] = TFHE.asEuint8(first);
+        usersGame.secret[1] = TFHE.asEuint8(second);
+        usersGame.secret[2] = TFHE.asEuint8(third);
+        usersGame.secret[3] = TFHE.asEuint8(fourth);
+    }
+
     function checkGuessedResultHacked(
         address player,
         uint32 gameId,
@@ -160,5 +173,74 @@ contract MincomindTester is Mincomind, FakeFHE {
 
     function viewPlayerPoints(address player) public view returns (uint32) {
         return points[player];
+    }
+
+    function endGamePossibleParams(address user) public view returns (uint64, uint64, bool) {
+        Game storage game = games[user][latestGames[user]];
+
+        return (game.lastGuessTimestamp, uint64(block.timestamp), game.lastGuessTimestamp < uint64(block.timestamp));
+    }
+
+    // debug end game
+    function endGameDebug(
+        address user
+    ) public view returns (uint32, uint256, uint16, bool, uint8, uint8, bool, bool, bool) {
+        Game storage game = games[user][latestGames[user]];
+        Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
+
+        return (
+            game.timeStarted,
+            block.timestamp - game.timeStarted,
+            MAX_SECONDS_PER_GAME,
+            block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME,
+            clue.cows,
+            clue.bulls,
+            clue.bulls == 4,
+            block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4,
+            !game.isComplete
+        );
+    }
+
+    function endGameAnotherTestingFunction(
+        address user
+    )
+        public
+        view
+        returns (
+            bool gameNotEnded,
+            uint8 bulls,
+            bool isCorrectGuess,
+            bool isOvertime,
+            uint256 gamePoints,
+            uint256 lockedFundsBefore
+        )
+    {
+        Game storage game = games[user][latestGames[user]];
+        // require(!game.isComplete, "Game is already ended");
+
+        gameNotEnded = !game.isComplete;
+        Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
+
+        bulls = clue.bulls;
+
+        // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
+        // require(clue.bulls == 4, "INCORRECT Guess");
+        // require(
+        //     (block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME) || clue.bulls == 4,
+        //     "Game is not yet ended"
+        // );
+        isCorrectGuess = clue.bulls == 4;
+        isOvertime = block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME;
+        gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        // points[user] += gamePoints;
+        // totalPoints += gamePoints;
+
+        // game.isComplete = true;
+
+        lockedFundsBefore = lockedFunds;
+
+        // lockedFunds -= DEPOSIT_AMOUNT;
+
+        // emit GameOutcome(user, latestGames[user], gamePoints);
     }
 }

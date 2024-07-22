@@ -11,8 +11,6 @@ contract Mincomind is Reencrypt {
         require(msg.value == DEPOSIT_AMOUNT, "Initial liquidity must be exactly 0.001 ether");
 
         totalPoints = 1;
-
-        lockedFunds = DEPOSIT_AMOUNT;
     }
 
     struct Game {
@@ -154,9 +152,30 @@ contract Mincomind is Reencrypt {
         require(!game.isComplete, "Game is already ended");
         Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
 
-        // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
-        require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
-        uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        // // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
+        // if (clue.bulls == 0) {
+        //     require(false, "Ended with 0");
+        // } else if (clue.bulls == 1) {
+        //     require(false, "Ended with 1");
+        // } else if (clue.bulls == 2) {
+        //     require(false, "Ended with 2");
+        // } else if (clue.bulls == 3) {
+        //     require(false, "Ended with 3");
+        // } else if (clue.bulls == 4) {
+        //     require(false, "Ended with 4");
+        // }
+        // require(clue.bulls == 4, "INCORRECT Guess");
+        // require(
+        //     (block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME) || clue.bulls == 4,
+        //     "Game is not yet ended"
+        // );
+        // uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        uint8 gamePoints;
+        if (clue.bulls == 4) {
+            gamePoints = 9 - game.numGuesses;
+        } else {
+            gamePoints = 0;
+        }
         points[user] += gamePoints;
         totalPoints += gamePoints;
 
@@ -164,16 +183,11 @@ contract Mincomind is Reencrypt {
 
         lockedFunds -= DEPOSIT_AMOUNT;
 
-        emit GameOutcome(msg.sender, latestGames[msg.sender], gamePoints);
+        emit GameOutcome(user, latestGames[user], gamePoints);
     }
 
     function withdrawFunds() public {
-        uint32 userPoints = points[msg.sender];
-
-        uint256 pot = address(this).balance - lockedFunds;
-
-        uint256 amount = (pot * userPoints) / totalPoints;
-
+        (uint32 userPoints, uint256 amount) = getUsersPointsAndBalance(msg.sender);
 
         // set points to 0 for user
         totalPoints -= userPoints;
@@ -191,5 +205,20 @@ contract Mincomind is Reencrypt {
 
     function getGame(address user, uint32 gameId) public view returns (Game memory) {
         return games[user][gameId];
+    }
+
+    function getUsersPointsAndBalance(
+        address user
+    ) public view returns (uint32 userPoints, uint256 usersWithdrawableBalance) {
+        userPoints = points[user];
+
+        uint256 pot = address(this).balance - lockedFunds;
+
+        usersWithdrawableBalance = (pot * userPoints) / totalPoints;
+    }
+
+    // Just for convenience
+    function getAvailableContractBalance() public view returns (uint256) {
+        return address(this).balance - lockedFunds;
     }
 }
