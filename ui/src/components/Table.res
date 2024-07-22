@@ -145,10 +145,10 @@ let useFetchPlayers = (~indexerEndpoint) => {
 
 @react.component
 let make = (~mincomind: Mincomind.instance, ~client: Viem.walletClient) => {
-  let playersReq = useFetchPlayers(
-    ~indexerEndpoint="https://indexer.staging.bigdevenergy.link/7f6ebc9/v1/graphql",
-  )
-  // let playersReq = useFetchPlayers(~indexerEndpoint="http://localhost:8080/v1/graphql")
+  // let playersReq = useFetchPlayers(
+  //   ~indexerEndpoint="https://indexer.staging.bigdevenergy.link/7f6ebc9/v1/graphql",
+  // )
+  let playersReq = useFetchPlayers(~indexerEndpoint=Config.indexerEndpoint)
 
   <div>
     <div

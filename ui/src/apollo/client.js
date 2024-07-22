@@ -7,18 +7,25 @@ const client = new ApolloClient({
 
 export default () => client; */
 
-import { ApolloClient, InMemoryCache, ApolloProvider, split, HttpLink } from '@apollo/client';
-import { WebSocketLink } from '@apollo/link-ws';
-import { getMainDefinition } from '@apollo/client/utilities';
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  split,
+  HttpLink,
+} from "@apollo/client";
+import { WebSocketLink } from "@apollo/link-ws";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { indexerEndpoint, wssIndexerEndpoint } from "../Config.res.mjs";
 
 // HTTP link for queries and mutations
 const httpLink = new HttpLink({
-  uri: 'https://indexer.staging.bigdevenergy.link/b13f675/v1/graphql',
+  uri: indexerEndpoint,
 });
 
 // WebSocket link for subscriptions
 const wsLink = new WebSocketLink({
-  uri: `wss://indexer.staging.bigdevenergy.link/b13f675/v1/graphql`,
+  uri: wssIndexerEndpoint,
   options: {
     reconnect: true,
   },
@@ -29,12 +36,12 @@ const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
     return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
+      definition.kind === "OperationDefinition" &&
+      definition.operation === "subscription"
     );
   },
   wsLink,
-  httpLink,
+  httpLink
 );
 
 const client = new ApolloClient({
@@ -43,7 +50,6 @@ const client = new ApolloClient({
 });
 
 export default () => client;
-
 
 // import { createWalletClient, custom } from 'viem'
 // import { mainnet } from 'viem/chains'

@@ -2,7 +2,7 @@
 // @module
 // external hardhatAbi: hardhatAbi =
 //   "../../../contracts/artifacts/contracts/Mincomind.sol/Mincomind.json"
-let address = "0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5"->Viem.getAddressUnsafe
+let address = "0x9502209a80dc5aEC0d29F2095610fA988000558e"->Viem.getAddressUnsafe
 @module("./abi.mjs") external abi: Viem.abi = "abi"
 // let abi =
 //   ["function getLatestGameId(address user) public view returns (uint32)"]->Viem.parseAbiUnsafe
