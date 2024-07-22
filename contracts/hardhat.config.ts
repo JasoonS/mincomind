@@ -11,7 +11,6 @@ import "./tasks/addGuess";
 import "./tasks/deployERC20";
 import "./tasks/endGame";
 import "./tasks/getEthereumAddress";
-import "./tasks/mint";
 import "./tasks/newGame";
 import "./tasks/withdrawFunds";
 
