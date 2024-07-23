@@ -19,7 +19,9 @@ task("task:addGuess")
     // await mincomind.connect(signers[taskArguments.account as keyof Signers]).addGuess([0, 0, 0, 0]);
     await mincomind
       .connect(signers[taskArguments.account as keyof Signers])
-      .addGuess([taskArguments.guess0, taskArguments.guess1, taskArguments.guess2, taskArguments.guess3]);
+      .addGuess([taskArguments.guess0, taskArguments.guess1, taskArguments.guess2, taskArguments.guess3], {
+        gasLimit: 30000000,
+      });
 
     console.log("Guess added created");
   });

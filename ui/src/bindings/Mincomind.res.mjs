@@ -4,7 +4,7 @@ import * as Viem from "viem";
 import * as AbiMjs from "./abi.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
-var address = Viem.getAddress("0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5");
+var address = Viem.getAddress("0x9502209a80dc5aEC0d29F2095610fA988000558e");
 
 var abi = AbiMjs.abi;
 

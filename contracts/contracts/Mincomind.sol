@@ -38,13 +38,16 @@ contract Mincomind is Reencrypt {
     // user => points
     mapping(address => uint32) public points;
 
+    // user => latestgameWasWon (1 = won 0 = not won)
+    mapping(address => euint8) public latestGameWasWon;
+
     uint32 public totalPoints;
 
     // amount of funds in contract still locked in an active game
     uint256 public lockedFunds;
 
     // anyone can end the game after 10 minutes to transfer the deposit to the pot
-    uint16 public constant MAX_SECONDS_PER_GAME = 600; // 10 minutes
+    uint16 public constant MAX_SECONDS_PER_GAME = 3600; // 1 hour 
 
     uint256 public constant DEPOSIT_AMOUNT = 1000000000000000; // 0.001 ether; // 1_000_000_000_000_000 wei
 
@@ -78,6 +81,8 @@ contract Mincomind is Reencrypt {
             );
         }
 
+        latestGameWasWon[msg.sender] = TFHE.asEuint8(0);
+
         uint32 latestGame = ++latestGames[msg.sender];
         uint8[4][8] memory guesses;
         games[msg.sender][latestGame] = Game({
@@ -99,6 +104,12 @@ contract Mincomind is Reencrypt {
         require(guessIndex < 8, "index too high");
 
         return compareArrays(game.secret, guess);
+    }
+
+    // todo: revert to being private
+    function checkUserHasWon(address user, uint64 lastGuessTimestamp) private view returns (bool) {        
+        require(block.timestamp > lastGuessTimestamp, "can't determine whether won in the same block");  
+        return TFHE.decrypt(latestGameWasWon[user]) == 1;        
     }
 
     function compareArrays(euint8[4] memory secret, uint8[4] memory guess) internal view returns (Clue memory) {
@@ -133,6 +144,7 @@ contract Mincomind is Reencrypt {
         return Clue({ bulls: TFHE.decrypt(bulls), cows: TFHE.decrypt(cows) });
     }
 
+    // todo: add a check to make sure a new game has been started
     function addGuess(uint8[4] memory guess) public {
         Game storage game = games[msg.sender][latestGames[msg.sender]];
         require(game.numGuesses < 8, "Too many guesses");
@@ -146,17 +158,22 @@ contract Mincomind is Reencrypt {
         //      Before going to 'mainnet' this contract should check and make sure miner manipulation cannot allow miners to exploit this contract.
         Clue memory guessHint = compareArrays(game.secret, guess);
 
+        if (guessHint.bulls == 4) {
+            latestGameWasWon[msg.sender] = TFHE.asEuint8(1);
+        }
+
         emit GuessAdded(msg.sender, latestGames[msg.sender], game.numGuesses, guess, guessHint.bulls, guessHint.cows);
     }
 
     function endGame(address user) public {
         Game storage game = games[user][latestGames[user]];
-        require(!game.isComplete, "Game is already ended");
-        Clue memory clue = checkGuessResult(user, latestGames[user], game.numGuesses - 1);
+        require(!game.isComplete, "Game is already ended");        
 
-        // if the user has not guessed the secret in 10 minutes, the game can be ended by anyone
-        require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || clue.bulls == 4, "Game is not yet ended");
-        uint8 gamePoints = clue.bulls == 4 ? 9 - game.numGuesses : 0;
+        bool hasWon = checkUserHasWon(user, game.lastGuessTimestamp);                
+
+        // if the user has not guessed the secret in 1 hour, the game can be ended by anyone
+        require(block.timestamp - game.timeStarted > MAX_SECONDS_PER_GAME || hasWon, "Game is not yet ended or user has not won");
+        uint8 gamePoints = hasWon ? 9 - game.numGuesses : 0;
         points[user] += gamePoints;
         totalPoints += gamePoints;
 

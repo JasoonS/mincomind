@@ -10,9 +10,9 @@ contracts:
       - event: FundsWithdrawn(address indexed player, uint256 amount)
 networks:
   - id: 9090 # Inco
-    start_block: 2462556
+    start_block: 2609313
     rpc_config:
       url: https://testnet.inco.org/
     contracts:
       - name: Game
-        address: 0x7DA25264C70EDD4944D5Ea2F163E2702c277f4e5
+        address: 0x9502209a80dc5aEC0d29F2095610fA988000558e
